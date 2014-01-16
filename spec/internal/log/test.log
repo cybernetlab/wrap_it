@@ -1,0 +1,619 @@
+--------------------------------------------------------------
+UsersHelperTest: test_0001_includes framework-specific methods
+--------------------------------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0002_renders base as div
+----------------------------------------------
+-------------------------------------------------
+UsersHelperTest: test_0003_captures block content
+-------------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0004_renders as ul
+----------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0005_renders child items
+----------------------------------------------
+--------------------------------------------------------------
+UsersHelperTest: test_0001_includes framework-specific methods
+--------------------------------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0002_renders base as div
+----------------------------------------------
+-------------------------------------------------
+UsersHelperTest: test_0003_captures block content
+-------------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0004_renders as ul
+----------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0005_renders child items
+----------------------------------------------
+--------------------------------------------------------------
+UsersHelperTest: test_0001_includes framework-specific methods
+--------------------------------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0002_renders base as div
+----------------------------------------------
+-------------------------------------------------
+UsersHelperTest: test_0003_captures block content
+-------------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0004_renders as ul
+----------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0005_renders child items
+----------------------------------------------
+--------------------------------------------------------------
+UsersHelperTest: test_0001_includes framework-specific methods
+--------------------------------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0002_renders base as div
+----------------------------------------------
+-------------------------------------------------
+UsersHelperTest: test_0003_captures block content
+-------------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0004_renders as ul
+----------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0005_renders child items
+----------------------------------------------
+--------------------------------------------------------------
+UsersHelperTest: test_0001_includes framework-specific methods
+--------------------------------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0002_renders base as div
+----------------------------------------------
+-------------------------------------------------
+UsersHelperTest: test_0003_captures block content
+-------------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0004_renders as ul
+----------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0005_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (14.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (15.4ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (14.6ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (16.7ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (14.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (14.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (14.6ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (58.8ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (13.3ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (14.8ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (13.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (13.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (15.6ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (14.5ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered text template (0.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered text template (0.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered text template (0.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered text template (0.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered text template (0.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (3.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (1.9ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.8ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.3ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (1.9ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.6ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.2ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.1ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (3.5ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (2.0ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (1.8ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
+----------------------------------------
+UsersHelperTest: test_0001_renders as ul
+----------------------------------------
+  Rendered inline template (1.9ms)
+----------------------------------------------
+UsersHelperTest: test_0002_renders child items
+----------------------------------------------
