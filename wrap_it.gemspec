@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
     |and easy creating html helpers with your own DSL. It's usefull for
     |implementing CSS frameworks, or making your own.
   EOL
-  spec.homepage      = ''
+  spec.homepage      = 'https://github.com/cybernetlab/wrap_it'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files`.split($/)
