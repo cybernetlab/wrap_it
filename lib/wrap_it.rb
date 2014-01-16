@@ -10,6 +10,7 @@ module WrapIt
   module Helpers; end
 
   def self.helpers(*list)
+    @helpers ||= {}
     options = list.extract_options!
     list.empty? && list = @helpers.keys
     prefix = options[:prefix].blank? ? '' : "#{options[:prefix]}_"
