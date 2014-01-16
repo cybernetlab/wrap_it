@@ -251,6 +251,14 @@ Creates your own DSL method to create child items. In arguments, you should spec
 * Finish Sinatra integration
 * Rubydoc documentation
 
+# Changes
+
+`0.1.1`
+* WrapIt.helpers fails if no helper registered
+
+`0.1.0`
+* initial version
+
 # License
 
 The MIT License (MIT)
