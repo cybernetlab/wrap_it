@@ -5,22 +5,22 @@ module WrapIt
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   module Enums
+    extend DerivedAttributes
+
     def self.included(base)
-      base <= Base || fail(
+      base == Base || fail(
         TypeError,
-        "#{self.class.name} can be included only into WrapIt::Base subclasses"
+        "#{self.class.name} can be included only into WrapIt::Base"
       )
-      extend DerivedAttributes
       base.extend ClassMethods
-      # include :after_initialize callback only once
-      base.after_initialize :enums_init if base == Base
+      base.after_initialize :enums_init
     end
 
     private
 
     def enums_init
       opt_keys = @options.keys
-      self.class.collect_derived(:@enums, {}, :merge).each do |name, opts|
+      enums.each do |name, opts|
         value = nil
         names = [name] + [opts[:aliases] || []].flatten
         opt_keys.select { |o| names.include? o }.each do |key|
@@ -35,6 +35,10 @@ module WrapIt
       end
     end
 
+    def enums
+      @nums ||= self.class.collect_derived(:@enums, {}, :merge)
+    end
+
     #
     # Class methods to include
     #
@@ -47,6 +51,12 @@ module WrapIt
       # `name: value` key-value pair with valid value, this pair removed from
       # options and enum takes this value.
       #
+      # If you set `html_class` option to `true`, with each enum change, HTML
+      # class, composed from `html_class_prefix` and enum `value` will be
+      # added to element. If you want to override this prefix, specify it
+      # with `html_class_prefix` option. By default, enum changes are not
+      # affected to html classes.
+      #
       # This method also adds getter and setter for this enum.
       #
       # @param  name [String, Symbol] Enum name. Converted to `Symbol`.
@@ -54,6 +64,8 @@ module WrapIt
       # @options options [String, Symbol] :html_class_prefix prefix of HTML
       #   class that will automatically added to element if enum changes its
       #   value.
+      # @options options [Boolean] :html_class whether this enum changes
+      #   should affect to html class.
       # @options options [Symbol, Array<Symbol>] :aliases list of enum aliases.
       #   Warning! Values are not converted - pass only `Symbols` here.
       # @options options [String, Symbol] :default default value for enum,
@@ -63,27 +75,41 @@ module WrapIt
       # @yieldreturn [void]
       #
       # @return [void]
-      def enum(name, values, options = {}, &block)
-        options.symbolize_keys!
+      def enum(name, values, opts = {}, &block)
+        opts.symbolize_keys!
         name = name.to_sym
-        options.merge!(block: block, name: name, values: values)
-        options.key?(:default) && options[:default] = options[:default].to_sym
-        options.key?(:html_class_prefix) && options[:regexp] =
-          /\A#{options[:html_class_prefix]}(?:#{values.join('|')})\z/
+        opts.merge!(block: block, name: name, values: values)
+        opts.key?(:default) && opts[:default] = opts[:default].to_sym
+        if opts.delete(:html_class) == true || opts.key?(:html_class_prefix)
+          opts[:html_class_prefix].is_a?(Symbol) &&
+            opts[:html_class_prefix] = opts[:html_class_prefix].to_s
+          prefix = html_class_prefix
+          opts[:html_class_prefix].is_a?(String) &&
+            prefix = opts[:html_class_prefix]
+          opts[:regexp] = /\A#{prefix}(?:#{values.join('|')})\z/
+          opts[:html_class_prefix] = prefix
+        end
         var = "@#{name}".to_sym
         define_method("#{name}") { instance_variable_get(var) }
-        define_method("#{name}=") do |value|
-          v = value if values.include?(value)
-          v ||= options[:default] if options.key?(:default)
-          instance_variable_set(var, v)
-          block.nil? || instance_exec(v, &block)
-          if options.key?(:regexp)
-            remove_html_class(options[:regexp])
-            v.nil? || add_html_class("#{options[:html_class_prefix]}#{v}")
-          end
-        end
+        define_method("#{name}=", &Enums.setter(name, &block))
         @enums ||= {}
-        @enums[name] = options
+        @enums[name] = opts
+      end
+    end
+
+    private
+
+    def self.setter(name, &block)
+      proc do |value|
+        opts = enums[name]
+        v = value if opts[:values].include?(value)
+        v ||= opts[:default] if opts.key?(:default)
+        instance_variable_set("@#{name}", v)
+        block.nil? || instance_exec(v, &block)
+        if opts.key?(:regexp)
+          remove_html_class(opts[:regexp])
+          v.nil? || add_html_class("#{opts[:html_class_prefix]}#{v}")
+        end
       end
     end
   end

@@ -5,6 +5,13 @@ module WrapIt
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   module Renderer
+    def self.included(base)
+      base == Base || fail(
+        TypeError,
+        "#{self.class.name} can be included only into WrapIt::Base"
+      )
+    end
+
     protected
 
     def empty_html

@@ -32,6 +32,13 @@ module WrapIt
   # Non rails render implementation
   #
   module Renderer
+    def self.included(base)
+      base == Base || fail(
+        TypeError,
+        "#{self.class.name} can be included only into WrapIt::Base"
+      )
+    end
+
     protected
 
     def empty_html

@@ -5,6 +5,13 @@ module WrapIt
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   module HTMLData
+    def self.included(base)
+      base == Base || fail(
+        TypeError,
+        "#{self.class.name} can be included only into WrapIt::Base"
+      )
+    end
+
     def set_html_data(name, value)
       @options[:data] ||= {}
       @options[:data][name.to_sym] = value

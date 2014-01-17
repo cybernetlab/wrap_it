@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe WrapIt::Switches do
+  it_behaves_like 'Base module'
+
   context 'wrapper have `active` switch' do
     before { wrapper_class.class_eval { switch :active } }
 
@@ -51,6 +53,17 @@ describe WrapIt::Switches do
       expect(wrapper.html_class).to include 'active'
       wrapper.active = false
       expect(wrapper.html_class).to_not include 'active'
+    end
+
+    it 'adds and remove html class with html_class_prefix' do
+      wrapper_class.class_eval do
+        html_class_prefix 'btn-'
+        switch :active, html_class: true
+        switch :big, html_class: 'large'
+      end
+      expect(wrapper(:active).html_class).to include 'btn-active'
+      @wrapper = nil
+      expect(wrapper(:big).html_class).to include 'btn-large'
     end
 
     it 'detects aliases' do

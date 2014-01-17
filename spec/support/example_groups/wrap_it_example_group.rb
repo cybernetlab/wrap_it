@@ -4,11 +4,17 @@
 # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
 #
 module WrapItExampleGroup
+  BASE_MODULES = [WrapIt::HTMLClass, WrapIt::HTMLData, WrapIt::Switches,
+                  WrapIt::Enums, WrapIt::Renderer]
+
   def self.included(base)
     base.instance_eval do
       metadata[:type] = :wrap_it
 
-      after { @successor = nil }
+      after do
+        @successor = nil
+        @wrapper = nil
+      end
 
       let(:template) { Object.new }
 
@@ -16,7 +22,11 @@ module WrapItExampleGroup
 
       let(:wrapper_class) do
         mod = described_class
-        Class.new(WrapIt::Base) { include mod }
+        if BASE_MODULES.include? mod
+          Class.new(WrapIt::Base)
+        else
+          Class.new(WrapIt::Base) { include mod }
+        end
       end
     end
   end

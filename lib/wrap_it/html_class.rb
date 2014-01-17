@@ -10,23 +10,47 @@ module WrapIt
     extend DerivedAttributes
 
     def self.included(base)
-      base <= Base || fail(
+      base == Base || fail(
         TypeError,
-        "#{self.class.name} can be included only into WrapIt::Base subclasses"
+        "#{self.class.name} can be included only into WrapIt::Base"
       )
       base.extend ClassMethods
     end
 
     #
-    # html class getter
+    # Sanitize HTML class list. Arguments list flatten and filtered for only
+    # Strings and Symbols. Duplicates are removed.
     #
-    # @return [Array<String>] array of html classes of element
+    # @override sanitize([html_class, ...])
+    # @param  html_class [Object] HTML class
+    #
+    # @return [Array<String>] sanitized HTML classes list
+    def self.sanitize(*args)
+      args
+        .flatten
+        .map { |a| a.is_a?(String) || a.is_a?(Symbol) ? a.to_s : nil }
+        .compact
+        .uniq
+    end
+
+    #
+    # html class getter.
+    #
+    # @return [Array<String>] array of html classes of element.
     def html_class
       @options[:class]
     end
 
     #
-    # Sets html class(es) for element
+    # HTML class prefix getter.
+    #
+    # @return [String] HTML class prefix.
+    def html_class_prefix
+      self.class.html_class_prefix
+    end
+
+    #
+    # Sets html class(es) for element.
     # @param  value [Symbol, String, Array<Symbol, String>] HTML class or list
     #   of classes. All classes will be converted to Strings, duplicates are
     #   removed.
@@ -53,13 +77,16 @@ module WrapIt
     #   element.add_html_class :b, :c, ['d', :c, :e, 'a']
     #   element.html_class #=> ['a', 'b', 'c', 'd', 'e']
     def add_html_class(*args)
-      @options[:class] += args.flatten.map { |c| c.to_s }
-      @options[:class].uniq!
+      if @options.key?(:class)
+        @options[:class].is_a?(Array) || options[:class] = [options[:class]]
+        args += @options[:class]
+      end
+      @options[:class] = HTMLClass.sanitize(*args)
       self # allow chaining
     end
 
     #
-    # Removes html class(es) from element. Chaining allowed
+    # Removes html class(es) from element. Chaining allowed.
     # @override add_html_class([[html_class], ...])
     # @param html_class [Symbol, String, Regexp, Array<Symbol, String, Regexp>]
     #   HTML class or list of HTML classes.
@@ -148,7 +175,7 @@ module WrapIt
     protected
 
     def add_default_classes
-      add_html_class self.class.collect_derived(:@html_class)
+      add_html_class(self.class.collect_derived(:@html_class))
     end
 
     private
@@ -184,9 +211,22 @@ module WrapIt
       #
       # @return [void]
       def html_class(*args)
-        @html_class ||= []
-        @html_class += args.flatten.map { |c| c.to_s }
-        @html_class.uniq!
+        @html_class.nil? || args += @html_class
+        @html_class = HTMLClass.sanitize(*args)
+      end
+
+      #
+      # @dsl
+      # Sets HTML class prefix. It used in switchers and enums
+      # @param  prefix [String] HTML class prefix
+      #
+      # @return [void]
+      def html_class_prefix(prefix = nil)
+        return get_derived(:@html_class_prefix) || '' if prefix.nil?
+        prefix.is_a?(String) || prefix.is_a?(Symbol) || fail(
+          ArgumentError, 'prefix should be a String or Symbol'
+        )
+        @html_class_prefix = prefix.to_s
       end
     end
   end

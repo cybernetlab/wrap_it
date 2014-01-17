@@ -148,6 +148,10 @@ Use `default_tag` DSL method inside your class to specify HTML tag name for elem
 
 Use `html_class` DSL method to add default html classes, thats are automatically added when element created.
 
+#### html_class_prefix(prefix)
+
+Sets html class prefix. It can be `Symbol` or `String` and converted to `String`. This value used with `switch` and `enum` functionality. See its descriptions below.
+
 #### omit_content
 
 Once this method called from class, this class will ommit any text content, captured from template. For example, `<%= element do %><p>Any content</p><% end %>` normally will produce `<div><p>Any content</p></div>`. In some cases you whant to drop `<p>Any content</p>`, for exmaple, inside tables.
@@ -158,8 +162,8 @@ Adds `switch`. Switch is a boolean flag. When element created, creation argument
 
 This method also adds getter and setter for this switch in form `name?` and `name=` respectively.
 
-You can pass `html_class` option. If it presend, this class will be added or removed to element when switch changes its state.
-
+When `html_class` option specified and switch changes its state, HTML class for element will be computed as follows. if `html_class` options is `true`, html class produced from `html_class_prefix` and `name` of switch. If `html_class` is a String, Symbol or Array of this types, html class produced as array of `html_class_prefix` and each `html_class` concatinations. This classes added to element if switch is on or removed in other case.
+      
 Also `aliases` option available. So if some of aliases founded in arguments it also changes switch state. You should pass only `Symbol` or `Array` if symbols to this optioin.
 
 If block given, it will be called each time switch changes its state in context of element with the switch state as argument.
@@ -170,7 +174,7 @@ Adds `enum`. When element created, creation arguments will be scanned for `Symbo
 
 This method also adds getter and setter for this enum.
 
-You can pass `html_class_prefix` option. If it present, HTML class will be combined from it and enum value and added or removed from element HTML class.
+If you set `html_class` option to `true`, with each enum change, HTML class, composed from `html_class_prefix` and enum `value` will be added to element. If you want to override this prefix, specify it with `html_class_prefix` option. By default, enum changes are not affected to html classes.
 
 Also `aliases` option available. So if some of aliases founded in creation options keys it also changes enum value. You should pass only `Symbol` or `Array` if symbols to this optioin.
 
@@ -268,6 +272,9 @@ Creates your own DSL method to create child items. In arguments, you should spec
 * Rubydoc documentation
 
 # Changes
+
+`0.1.4`
+* added: html_class_prefix
 
 `0.1.3`
 * this is a fix for 0.1.2, that it was not properly compiled.

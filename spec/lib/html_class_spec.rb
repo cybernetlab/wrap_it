@@ -1,11 +1,21 @@
 require 'spec_helper'
 
 describe WrapIt::HTMLClass do
-  it 'have html_class class method' do
+  it_behaves_like 'Base module'
+
+  it 'has self.html_class and #html_class methods' do
     wrapper_class.class_eval { html_class :a, [:b, 'c'] }
     expect(wrapper.html_class).to eq %w(a b c)
     sub_class = Class.new(wrapper_class) { html_class :a, [:d, 'e'] }
     expect(sub_class.new(template).html_class).to eq %w(a d e b c)
+  end
+
+  it 'has self.html_class_prefix and #html_class_prefix methods' do
+    expect(wrapper.html_class_prefix).to eq ''
+    wrapper_class.class_eval { html_class_prefix 'e-' }
+    expect(wrapper.html_class_prefix).to eq 'e-'
+    sub_class = Class.new(wrapper_class)
+    expect(sub_class.new(template).html_class_prefix).to eq 'e-'
   end
 
   it 'has #add_html_class with chaining' do
@@ -34,7 +44,7 @@ describe WrapIt::HTMLClass do
     expect(wrapper.html_class? { |x| x[0] == 'a' }).to be_true
   end
 
-  it 'has #html_class? method' do
+  it 'has #no_html_class? method' do
     expect(wrapper.add_html_class(:a1, :b1).no_html_class?('a2')).to be_true
     expect(wrapper.no_html_class?(:a2, :b2)).to be_true
     expect(wrapper.no_html_class?(:a1, :b2)).to be_false
@@ -60,7 +70,8 @@ describe WrapIt::HTMLClass do
     it 'add_html_class' do
       element.html_class = 'a'
       element.add_html_class :b, :c, ['d', :c, :e, 'a']
-      expect(element.html_class).to eq %w(a b c d e)
+      expect(element.html_class).to include(*%w(a b c d e))
+      expect(element.html_class.size).to eq 5
     end
 
     it 'remove_html_class' do

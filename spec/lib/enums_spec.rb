@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe WrapIt::Enums do
+  it_behaves_like 'Base module'
+
   context 'wrapper have `kind` enum' do
     before { wrapper_class.class_eval { enum :kind, [:white, :black] } }
 
@@ -52,6 +54,14 @@ describe WrapIt::Enums do
       wrapper.kind = :black
       expect(wrapper.html_class).to include 'test-black'
       expect(wrapper.html_class).to_not include 'test-white'
+    end
+
+    it 'adds and removes html class with default html_class_prefix' do
+      wrapper_class.class_eval do
+        html_class_prefix 'test-'
+        enum :kind, [:white, :black], html_class: true
+      end
+      expect(wrapper(:white).html_class).to include 'test-white'
     end
 
     it 'detects aliases' do
