@@ -269,6 +269,9 @@ Creates your own DSL method to create child items. In arguments, you should spec
 
 # Changes
 
+`0.1.3`
+* this is a fix for 0.1.2, that it was not properly compiled.
+
 `0.1.2`
 * fixed: double callbacks inclusion issue
 * added: Base#wrap
