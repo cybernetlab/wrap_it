@@ -12,7 +12,8 @@ module WrapIt
       )
       extend DerivedAttributes
       base.extend ClassMethods
-      base.after_initialize :enums_init
+      # include :after_initialize callback only once
+      base.after_initialize :enums_init if base == Base
     end
 
     private

@@ -2,6 +2,20 @@ module WrapIt
   #
   # Base class for all HTML helper classes
   #
+  # @example Prevent user from changing element tag
+  #   class Helper < WrapIt::Base
+  #     after_initialize { @tag = 'table' }
+  #   end
+  # @example Including some simple HTML into content
+  #   class Helper < WrapIt::Base
+  #     after_initialize do
+  #       @icon = optioins.delete(:icon)
+  #     end
+  #     after_capture do
+  #       unless @icon.nil?
+  #       @content = html_safe("<i class=\"#{@icon}\"></i>") + @content
+  #     end
+  #   end
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   class Base
@@ -11,6 +25,7 @@ module WrapIt
     callback :initialize, :capture, :render
 
     include HTMLClass
+    include HTMLData
     include Switches
     include Enums
     include Renderer
@@ -38,25 +53,35 @@ module WrapIt
       self.class.get_derived(:@omit_content)
     end
 
+    #
+    # Renders element to template
+    #
+    # @override render([content, ...])
+    # @param  content [String] additional content that will be appended
+    #                          to element content
+    # @yield [element] Runs block after capturing element content and before
+    #                  rendering it. Returned value appended to content.
+    # @yieldparam element [Base] rendering element.
+    # @yieldreturn [String, nil] content to append to HTML
+    #
+    # @return [String] rendered HTML for element
     def render(*args, &render_block)
       # return cached copy if it available
       return @content unless @content.nil?
       @content = empty_html
 
-      # capture content from block
       do_capture
+
       # add to content string args and block result if its present
       args.flatten.each { |a| @content << a if a.is_a? String }
-      block_given? && @content << instance_exec(self, &render_block)
-
-      # cleanup options from empty values
-      @options.select! { |k, v| !v.nil? && !v.empty? }
-      # render element
-      run_callbacks :render do
-        @content = content_tag(@tag, @content, @options)
+      if block_given?
+        result = instance_exec(self, &render_block) || empty_html
+        result.is_a?(String) && @content << result
       end
 
-#      @content = @wrapper.render(@content.html_safe) if @wrapper.is_a?(Base)
+      do_render
+      do_wrap
+
       if @template.output_buffer.nil?
         # when render called from code, just return content as a String
         @content
@@ -64,6 +89,38 @@ module WrapIt
         # in template context, write content to templates buffer
         concat(@content)
         empty_html
+      end
+    end
+
+    #
+    # Wraps element with another.
+    #
+    # You can provide wrapper directly or specify wrapper class as first
+    # argument. In this case wrapper will created with specified set of
+    # arguments and options. If wrapper class ommited, WrapIt::Base will
+    # be used.
+    #
+    # If block present, it will be called when wrapper will rendered.
+    #
+    # @override wrap(wrapper)
+    # @param  wrapper [Base] wrapper instance.
+    #
+    # @override wrap(wrapper_class, [arg, ...], options = {})
+    # @param  wrapper_class [Class] WrapIt::Base subclass for wrapper.
+    # @param  arg [String, Symbol] wrapper creation arguments.
+    # @param  options [Hash] wrapper creation options.
+    #
+    # @override wrap([arg, ...], options = {})
+    # @param  arg [String, Symbol] wrapper creation arguments.
+    # @param  options [Hash] wrapper creation options.
+    #
+    # @return [void]
+    def wrap(*args, &block)
+      if args.first.is_a?(Base)
+        @wrapper = args.shift
+      else
+        wrapper_class = args.first.is_a?(Class) ? args.shift : Base
+        @wrapper = wrapper_class.new(@template, *args, &block)
       end
     end
 
@@ -96,6 +153,8 @@ module WrapIt
       @options = hash
     end
 
+    private
+
     def do_capture
       run_callbacks :capture do
         @content ||= empty_html
@@ -103,6 +162,18 @@ module WrapIt
           @content << (capture(self, &@block) || empty_html)
         end
       end
+    end
+
+    def do_render
+      # cleanup options from empty values
+      @options.select! { |k, v| !v.nil? && !v.empty? }
+      run_callbacks :render do
+        @content = content_tag(tag, @content, options)
+      end
+    end
+
+    def do_wrap
+      @wrapper.is_a?(Base) && @content = @wrapper.render(html_safe(@content))
     end
   end
 end

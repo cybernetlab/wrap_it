@@ -12,7 +12,8 @@ module WrapIt
       )
       extend DerivedAttributes
       base.extend ClassMethods
-      base.after_initialize :switches_init
+      # include :after_initialize callback only once
+      base.after_initialize :switches_init if base == Base
     end
 
     private
@@ -60,7 +61,7 @@ module WrapIt
         options.symbolize_keys!
         name = name.to_sym
         options.merge!(block: block, name: name)
-        names = [name] + [[options[:aliases]] || []].flatten
+        names = [name] + [[options[:aliases]] || []].flatten.compact
         var = "@#{name}".to_sym
         define_method("#{name}?") { instance_variable_get(var) == true }
         define_method("#{name}=") do |value|

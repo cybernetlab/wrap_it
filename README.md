@@ -180,6 +180,14 @@ If block given, it will be called each time enum changes its value in context of
 
 ### Instance methods
 
+#### wrap(*args, &block)
+
+Wraps element with another.
+
+You can provide wrapper directly or specify wrapper class as first argument. In this case wrapper will created with specified set of arguments and options. If wrapper class ommited, WrapIt::Base will be used.
+
+If block present, it will be called when wrapper will rendered.
+
 #### html_class
 
 Returns array of html classes
@@ -236,6 +244,14 @@ element.html_class? { |x| x == 'a' } #=> true
 
 Determines whether element doesn't contains class, satisfied by conditions, specified in method arguments. See `html_class?`.
 
+#### set_html_data(name, value)
+
+Sets HTML data attribute named `name` to `value`.
+
+#### remove_html_data(name)
+
+Removes HTML data attribute named `name`.
+
 ## WrapIt::Container
 
 ### DSL methods
@@ -252,6 +268,12 @@ Creates your own DSL method to create child items. In arguments, you should spec
 * Rubydoc documentation
 
 # Changes
+
+`0.1.2`
+* fixed: double callbacks inclusion issue
+* added: Base#wrap
+* added: HTML data attribute processing
+* test improvements
 
 `0.1.1`
 * WrapIt.helpers fails if no helper registered

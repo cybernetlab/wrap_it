@@ -10,6 +10,10 @@ describe WrapIt::Base do
     expect(successor.tag).to eq 'a'
   end
 
+  it 'gets tag name from options' do
+    expect(successor(tag: 'p').tag).to eq 'p'
+  end
+
   it 'extends @arguments with ArgumentsArray module' do
     expect(
       successor.instance_variable_get(:@arguments)

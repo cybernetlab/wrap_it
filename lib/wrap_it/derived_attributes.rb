@@ -16,7 +16,7 @@ module WrapIt
       def get_derived(name)
         return instance_variable_get(name) if instance_variable_defined?(name)
         ancestors.each do |ancestor|
-          break if ancestor == Base
+          break if ancestor == Object
           next unless ancestor.instance_variable_defined?(name)
           return ancestor.instance_variable_get(name)
         end
@@ -25,8 +25,11 @@ module WrapIt
 
       def collect_derived(name, initial = [], method = :concat)
         result = initial
+        # if instance_variable_defined?(name)
+        #  result = result.send(method, instance_variable_get(name))
+        # end
         ancestors.each do |ancestor|
-          break if ancestor == Base
+          break if ancestor == Object
           next unless ancestor.instance_variable_defined?(name)
           result = result.send(method, ancestor.instance_variable_get(name))
         end

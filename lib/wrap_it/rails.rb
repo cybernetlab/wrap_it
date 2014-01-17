@@ -5,6 +5,8 @@ module WrapIt
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   module Renderer
+    protected
+
     def empty_html
       ''.html_safe
     end

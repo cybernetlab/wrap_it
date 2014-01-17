@@ -32,6 +32,8 @@ module WrapIt
   # Non rails render implementation
   #
   module Renderer
+    protected
+
     def empty_html
       ''
     end

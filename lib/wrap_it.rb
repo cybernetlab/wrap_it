@@ -64,6 +64,7 @@ require 'wrap_it/derived_attributes'
 require 'wrap_it/callbacks'
 require 'wrap_it/arguments_array'
 require 'wrap_it/html_class'
+require 'wrap_it/html_data'
 require 'wrap_it/switches'
 require 'wrap_it/enums'
 if defined? Rails
