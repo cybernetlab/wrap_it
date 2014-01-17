@@ -74,3 +74,4 @@ end
 require 'wrap_it/base'
 require 'wrap_it/container'
 require 'wrap_it/text_container'
+require 'wrap_it/link'

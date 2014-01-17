@@ -6,4 +6,6 @@ describe WrapIt::Container do
 #    successor.test
 #    expect(successor.instance_variable_get(:@children).size).to eq 1
 #  end
+
+  pending 'adds safe helpers'
 end

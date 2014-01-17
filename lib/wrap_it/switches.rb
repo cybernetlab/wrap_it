@@ -19,8 +19,9 @@ module WrapIt
     private
 
     def switches_init
+      @switches = {}
       keys = switches.keys
-      keys.each { |switch| instance_variable_set("@#{switch}", false) }
+      # keys.each { |switch| @switches[switch] = false }
       @options.keys.select { |o| keys.include?(o) }.each do |switch|
         send("#{switches[switch][:name]}=", @options.delete(switch) == true)
       end
@@ -30,7 +31,7 @@ module WrapIt
     end
 
     def switches
-      @switches ||= self.class.collect_derived(:@switches, {}, :merge)
+      @switches_hash ||= self.class.collect_derived(:@switches, {}, :merge)
     end
 
     #
@@ -83,8 +84,7 @@ module WrapIt
             end
         end
         names = [name] + [[options[:aliases]] || []].flatten.compact
-        var = "@#{name}".to_sym
-        define_method("#{name}?") { instance_variable_get(var) == true }
+        define_method("#{name}?") { @switches[name] == true }
         define_method("#{name}=", &Switches.setter(name, &block))
         @switches ||= {}
         names.each { |n| @switches[n] = options }
@@ -102,7 +102,7 @@ module WrapIt
     def self.setter(name, &block)
       proc do |value|
         opts = switches[name]
-        instance_variable_set("@#{name}", value == true)
+        @switches[name] = value == true
         if value == true
           opts.key?(:html_class) && add_html_class(*opts[:html_class])
           block.nil? || instance_exec(true, &block)

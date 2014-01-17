@@ -19,6 +19,7 @@ module WrapIt
     private
 
     def enums_init
+      @enums = {}
       opt_keys = @options.keys
       enums.each do |name, opts|
         value = nil
@@ -36,7 +37,7 @@ module WrapIt
     end
 
     def enums
-      @nums ||= self.class.collect_derived(:@enums, {}, :merge)
+      @enums_hash ||= self.class.collect_derived(:@enums, {}, :merge)
     end
 
     #
@@ -89,8 +90,7 @@ module WrapIt
           opts[:regexp] = /\A#{prefix}(?:#{values.join('|')})\z/
           opts[:html_class_prefix] = prefix
         end
-        var = "@#{name}".to_sym
-        define_method("#{name}") { instance_variable_get(var) }
+        define_method("#{name}") { @enums[name] }
         define_method("#{name}=", &Enums.setter(name, &block))
         @enums ||= {}
         @enums[name] = opts
@@ -104,7 +104,7 @@ module WrapIt
         opts = enums[name]
         v = value if opts[:values].include?(value)
         v ||= opts[:default] if opts.key?(:default)
-        instance_variable_set("@#{name}", v)
+        @enums[name] = v
         block.nil? || instance_exec(v, &block)
         if opts.key?(:regexp)
           remove_html_class(opts[:regexp])

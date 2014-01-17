@@ -10,12 +10,21 @@ describe WrapIt::HTMLClass do
     expect(sub_class.new(template).html_class).to eq %w(a d e b c)
   end
 
-  it 'has self.html_class_prefix and #html_class_prefix methods' do
-    expect(wrapper.html_class_prefix).to eq ''
-    wrapper_class.class_eval { html_class_prefix 'e-' }
-    expect(wrapper.html_class_prefix).to eq 'e-'
-    sub_class = Class.new(wrapper_class)
-    expect(sub_class.new(template).html_class_prefix).to eq 'e-'
+  describe '#html_class_prefix' do
+    it 'returns empty string by default' do
+      expect(wrapper.html_class_prefix).to eq ''
+    end
+
+    it 'returns value setted by class method' do
+      wrapper_class.class_eval { html_class_prefix 'e-' }
+      expect(wrapper.html_class_prefix).to eq 'e-'
+    end
+
+    it 'returns derived value' do
+      wrapper_class.class_eval { html_class_prefix 'e-' }
+      sub_class = Class.new(wrapper_class)
+      expect(sub_class.new(template).html_class_prefix).to eq 'e-'
+    end
   end
 
   it 'has #add_html_class with chaining' do

@@ -5,8 +5,9 @@ module WrapIt
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   module Callbacks
+    extend DerivedAttributes
+
     def self.included(base)
-      extend DerivedAttributes
       base.extend ClassMethods
     end
 

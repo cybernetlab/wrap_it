@@ -46,7 +46,7 @@ module WrapIt
     #
     # @return [String] HTML class prefix.
     def html_class_prefix
-      self.class.html_class_prefix
+      @html_class_prefix ||= self.class.html_class_prefix
     end
 
     #
@@ -222,7 +222,7 @@ module WrapIt
       #
       # @return [void]
       def html_class_prefix(prefix = nil)
-        return get_derived(:@html_class_prefix) || '' if prefix.nil?
+        return(get_derived(:@html_class_prefix) || '') if prefix.nil?
         prefix.is_a?(String) || prefix.is_a?(Symbol) || fail(
           ArgumentError, 'prefix should be a String or Symbol'
         )

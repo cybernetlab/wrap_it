@@ -7,7 +7,7 @@ module WrapIt
   module TextContainer
     def self.included(base)
       base.class_eval do
-        default_tag 'p'
+        default_tag 'p', false
 
         after_initialize do
           @body = @arguments.extract_first!(String) || empty_html

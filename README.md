@@ -273,6 +273,12 @@ Creates your own DSL method to create child items. In arguments, you should spec
 
 # Changes
 
+`0.1.5`
+* fixed: switches and enums can damage instance variables
+* fixed: process helper_name option before initialize callbacks
+* fixed: convert user defined tag to string
+* added: Link class
+
 `0.1.4`
 * added: html_class_prefix
 

@@ -38,15 +38,20 @@ module WrapIt
     def initialize(template, *args, &block)
       @template, @arguments, @block = template, args, block
       self.options = @arguments.extract_options!
+
+      @helper_name = @options.delete(:helper_name)
+      @helper_name.is_a?(String) && @helper_name = @helper_name.to_sym
+
       @arguments.extend ArgumentsArray
       add_default_classes
+
       run_callbacks :initialize do
         @tag = @options.delete(:tag) ||
           self.class.get_derived(:@default_tag) || 'div'
-        @helper_name = @options.delete(:helper_name)
-        @helper_name.is_a?(String) && @helper_name = @helper_name.to_sym
+        @tag = @tag.to_s
       end
-      @argument = nil
+
+      @arguments = nil
     end
 
     def omit_content?
@@ -124,6 +129,10 @@ module WrapIt
       end
     end
 
+    def unwrap
+      @wrapper = nil
+    end
+
     protected
 
     #
@@ -132,10 +141,10 @@ module WrapIt
     # @param  name [<Symbol, String>] Tag name. Converted to `String`.
     #
     # @return [void]
-    def self.default_tag(name)
+    def self.default_tag(name, override = true)
       name.is_a?(String) || name.is_a?(Symbol) ||
         fail(ArgumentError, 'Tag name should be a String or Symbol')
-      @default_tag = name.to_s
+      override ? @default_tag = name.to_s : @default_tag ||= name.to_s
     end
 
     def self.omit_content
@@ -166,7 +175,9 @@ module WrapIt
 
     def do_render
       # cleanup options from empty values
-      @options.select! { |k, v| !v.nil? && !v.empty? }
+      @options.select! do |k, v|
+        !v.nil? && (!v.respond_to?(:empty?) || !v.empty?)
+      end
       run_callbacks :render do
         @content = content_tag(tag, @content, options)
       end
