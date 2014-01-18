@@ -81,6 +81,8 @@ Library have no specific configuration.
 
 # Usage
 
+> This library actively used in [BootstrapIt](https://github.com/cybernetlab/bootstrap_it) package, so explore this project, especially it's [lib/bootstrap_it/view_helpers](https://github.com/cybernetlab/bootstrap_it/tree/master/lib/bootstrap_it/view_helpers) folder for examples of usage.
+
 All helpers classes derived from `WrapIt::Base` class, that provides allmost all functionality. For helpers, thats includes other helpers, use `WrapIt::Container` class. Where are some library-specific methods, defined directly in `WrapIt` module.
 
 Simple example explained above. More complex usage is to provide some logic to initalization, capturing and rendering process. To do this, use `after` or `before` `initialize`, `capture` and `reder` callbacks respectively. Usually `after` callbacks used. `initialize` callbacks runs around arguments and optioins parsed, `capture` callbacks runs around capturing content of element and `render` callbacks runs around wrapping content into element tag.
