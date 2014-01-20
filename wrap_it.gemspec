@@ -25,10 +25,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_development_dependency 'bundler', '~> 1.3'
-  spec.add_development_dependency 'rake', '~> 10.1.1'
+  spec.add_development_dependency 'rake', '~> 10.1'
   spec.add_development_dependency 'redcarpet', '~> 1.17'
-  spec.add_development_dependency 'yard', '~> 0.8.7'
-  spec.add_development_dependency 'rspec', '~> 2.14.1'
-  spec.add_development_dependency 'rspec-html-matchers', '~> 0.4.4'
-#  spec.add_development_dependency 'capybara', '~> 2.2.1'
+  spec.add_development_dependency 'yard', '~> 0.8'
+  spec.add_development_dependency 'rspec', '~> 2.14'
+  spec.add_development_dependency 'rspec-html-matchers', '~> 0.4'
 end

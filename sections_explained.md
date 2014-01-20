@@ -24,7 +24,7 @@ For example, lets look on [Twitter Bootstrap input groups](http://getbootstrap.c
 </div>
 ```
 
-We main element `input`, wrapped into `div`, and optionally appended or prepended with `span` elements. So, lets code:
+We have main element `input`, wrapped into `div`, and optionally appended or prepended with `span` elements. So, lets code:
 
 ```ruby
 module BS
