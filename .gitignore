@@ -1,12 +1,18 @@
-.rspec
-Gemfile.lock
-
-
-# Ignore bundler config.
-/.bundle
-
-# Ignore all logfiles and tempfiles.
-/log/*.log
-/tmp
-
 *.gem
+*.rbc
+.bundle
+.config
+.yardoc
+Gemfile.lock
+Gemfile.*.lock
+InstalledFiles
+_yardoc
+coverage
+doc/
+lib/bundler/man
+pkg
+rdoc
+spec/reports
+test/tmp
+test/version_tmp
+tmp

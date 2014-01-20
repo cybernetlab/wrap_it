@@ -5,7 +5,7 @@
 #
 module WrapItExampleGroup
   BASE_MODULES = [WrapIt::HTMLClass, WrapIt::HTMLData, WrapIt::Switches,
-                  WrapIt::Enums, WrapIt::Renderer]
+                  WrapIt::Enums, WrapIt::Renderer, WrapIt::Sections]
 
   def self.included(base)
     base.instance_eval do
@@ -16,7 +16,7 @@ module WrapItExampleGroup
         @wrapper = nil
       end
 
-      let(:template) { Object.new }
+      let(:template_wrapper) { Object.new }
 
       let(:successor_class) { Class.new described_class }
 
@@ -32,11 +32,13 @@ module WrapItExampleGroup
   end
 
   def successor(*args, &block)
-    @successor ||= successor_class.new(template, *args, &block)
+    templ = respond_to?(:template) ? template : template_wrapper
+    @successor ||= successor_class.new(templ, *args, &block)
   end
 
   def wrapper(*args, &block)
-    @wrapper ||= wrapper_class.new(template, *args, &block)
+    templ = respond_to?(:template) ? template : template_wrapper
+    @wrapper ||= wrapper_class.new(templ, *args, &block)
   end
 
   RSpec.configure do |config|

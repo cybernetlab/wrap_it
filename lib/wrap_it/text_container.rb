@@ -9,6 +9,9 @@ module WrapIt
       base.class_eval do
         default_tag 'p', false
 
+        section :body
+        place :body, :before, :content
+
         after_initialize do
           @body = @arguments.extract_first!(String) || empty_html
           @body += @options[:body] || @options[:text] || empty_html
@@ -17,9 +20,11 @@ module WrapIt
         end
 
         after_capture do
-          @content = html_safe(@body) + @content unless @body.nil?
+          self[:body] = html_safe(@body) unless @body.nil?
         end
       end
     end
+
+    attr_accessor :body
   end
 end

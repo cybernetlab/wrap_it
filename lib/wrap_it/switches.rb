@@ -21,7 +21,6 @@ module WrapIt
     def switches_init
       @switches = {}
       keys = switches.keys
-      # keys.each { |switch| @switches[switch] = false }
       @options.keys.select { |o| keys.include?(o) }.each do |switch|
         send("#{switches[switch][:name]}=", @options.delete(switch) == true)
       end
@@ -58,7 +57,7 @@ module WrapIt
       # on or removed in other case.
       #
       # @param  name [String, Symbol] Switch name. Converted to `Symbol`.
-      # @param  opts = {} [Hash] Switch options
+      # @param  opts [Hash] Switch options
       # @options opts [true, String, Symbol, Array<String, Symbol>] :html_class
       #   HTML classes list that will automatically added to element if switch
       #   is on or removed from element if switch id off.
@@ -66,7 +65,8 @@ module WrapIt
       #   Warning! Values are not converted - pass only `Symbols` here.
       # @yield [state] Runs block when switch state changed, gives it to block.
       # @yieldparam state [Boolean] Whether switch is on or off.
-      # @yieldreturn [void]
+      # @yieldreturn [Object, FalseClass] if you return `false`, value will
+      #   ommited.
       #
       # @return [void]
       def switch(name, options = {}, &block)
@@ -102,13 +102,14 @@ module WrapIt
     def self.setter(name, &block)
       proc do |value|
         opts = switches[name]
-        @switches[name] = value == true
-        if value == true
-          opts.key?(:html_class) && add_html_class(*opts[:html_class])
-          block.nil? || instance_exec(true, &block)
-        else
-          opts.key?(:html_class) && remove_html_class(*opts[:html_class])
-          block.nil? || instance_exec(false, &block)
+        cb_return = block.nil? || instance_exec(value == true, &block)
+        unless cb_return == false
+          @switches[name] = value == true
+          if value == true
+            opts.key?(:html_class) && add_html_class(*opts[:html_class])
+          else
+            opts.key?(:html_class) && remove_html_class(*opts[:html_class])
+          end
         end
       end
     end

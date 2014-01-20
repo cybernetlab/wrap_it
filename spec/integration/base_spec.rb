@@ -7,19 +7,19 @@ describe WrapIt::Base do
   end
 
   it 'renders base as div' do
-    render '<%= successor_helper %>'
+    render '<%= helper %>'
     expect(rendered).to have_tag 'div', count: 1
   end
 
   describe 'self.omit_content' do
     it 'captures block content' do
-      render '<%= successor_helper do %>Some text<% end %>'
+      render '<%= helper do %>Some text<% end %>'
       expect(rendered).to have_tag 'div', count: 1, text: /Some text/
     end
 
     it 'omits block content with omit_content' do
       successor_class.class_eval { omit_content }
-      render '<%= successor_helper do %>Some text<% end %>'
+      render '<%= helper do %>Some text<% end %>'
       expect(rendered).to have_tag 'div', count: 1, text: ''
     end
   end
@@ -38,26 +38,26 @@ describe WrapIt::Base do
 
   describe '#wrap' do
     it 'wraps with WrapIt::Base by default' do
-      render '<%= successor_helper(tag: :p) { |s| s.wrap } %>'
+      render '<%= helper(tag: :p) { |s| s.wrap } %>'
       expect(rendered).to have_tag 'div > p'
     end
 
     it 'wraps with WrapIt::Base and creating options' do
-      render '<%= successor_helper(tag: :p) { |s| s.wrap tag: :nav } %>'
+      render '<%= helper(tag: :p) { |s| s.wrap tag: :nav } %>'
       expect(rendered).to have_tag 'nav > p'
     end
 
     it 'wraps with class and creating options' do
       render <<-EOL
         <% w = Class.new(WrapIt::Base) { switch :sw, html_class: 'act' } %>
-        <%= successor_helper(tag: :p) { |s| s.wrap w, :sw, tag: :nav } %>'
+        <%= helper(tag: :p) { |s| s.wrap w, :sw, tag: :nav } %>'
       EOL
       expect(rendered).to have_tag 'nav.act > p'
     end
 
     it 'wraps with block' do
       render <<-EOL
-        <%= successor_helper(tag: :p) { |s| s.wrap do
+        <%= helper(tag: :p) { |s| s.wrap do
           |w| w.add_html_class 'nav'
         end } %>'
       EOL

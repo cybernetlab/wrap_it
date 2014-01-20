@@ -5,22 +5,26 @@ This library provides set of classes and modules with simple DSL for quick and e
 For example, your designer makes perfect button style for some site. This element will appears in many places of site in some variations. The button have `danger`, `success` and `default` look, and can have `active` state. Button can have some icon. So, you make some CSS styles, and now you should place HTML markup of this element in many places of site. With `wrap_it` library you can do it with following code:
 
 ```ruby
-class PerfectButton < WrapIt::Container
-  include TextContainer
-  html_class 'button'
-  enum :look, [:default, :success, :danger], html_class_prefix: 'button-'
-  switch :active, html_class: 'button-active'
-  child :icon, [tag: 'img', class: 'button-icon']
-end
+WrapIt.register_module Helpers
 
-WrapIt.register :p_button, 'PerfectButton'
+module Helpers
+  class PerfectButton < WrapIt::Container
+    include TextContainer
+    html_class 'button'
+    enum :look, [:default, :success, :danger], html_class_prefix: 'button-'
+    switch :active, html_class: 'button-active'
+    child :icon, [tag: 'img', class: 'button-icon']
+  end
+
+  register :p_button, 'PerfectButton'
+end
 ```
 
 Now, include this helper into you template engine. For Rails:
 
 ```ruby
 class MyController < ApplicationController
-  helper WrapIt.helpers
+  helper Helpers
   ...
 end
 ```
@@ -50,6 +54,8 @@ This will produce following code:
 ```
 
 Note, that lines 2 and 3 produces same html markup.
+
+> **Wraning!** Module registration process changed since 0.2.0. So, if you migrate from 0.1.5, look above examples again and fix your startup code.
 
 # Status
 
@@ -81,11 +87,11 @@ Library have no specific configuration.
 
 # Usage
 
-> This library actively used in [BootstrapIt](https://github.com/cybernetlab/bootstrap_it) package, so explore this project, especially it's [lib/bootstrap_it/view_helpers](https://github.com/cybernetlab/bootstrap_it/tree/master/lib/bootstrap_it/view_helpers) folder for examples of usage.
+> This library actively used in [BootstrapIt](https://github.com/cybernetlab/bootstrap_it) package, so explore this project, especially it's [lib/bootstrap_it/view_helpers](https://github.com/cybernetlab/bootstrap_it/tree/master/lib/bootstrap_it/view_helpers) folder for usage examples.
 
 All helpers classes derived from `WrapIt::Base` class, that provides allmost all functionality. For helpers, thats includes other helpers, use `WrapIt::Container` class. Where are some library-specific methods, defined directly in `WrapIt` module.
 
-Simple example explained above. More complex usage is to provide some logic to initalization, capturing and rendering process. To do this, use `after` or `before` `initialize`, `capture` and `reder` callbacks respectively. Usually `after` callbacks used. `initialize` callbacks runs around arguments and optioins parsed, `capture` callbacks runs around capturing content of element and `render` callbacks runs around wrapping content into element tag.
+Simple example explained above. More complex usage is to provide some logic to initalization, capturing and rendering process. To do this, use `after` or `before` `initialize`, `capture` and `reder` callbacks respectively. Usually `after` callbacks used. `initialize` callbacks runs around arguments and optioins parsing, `capture` callbacks runs around capturing element sections and `render` callbacks runs around wrapping content into element tag.
 
 Inside callbacks some usefull instance variables available.
 
@@ -95,9 +101,11 @@ Inside callbacks some usefull instance variables available.
 
 `@arguments` array available only in `after_initialize` callback and contains creation arguments. Its recommended to extract arguments, related to your class from this array if you plan to subclass your helper in future, so when subclasses `after_initialize` called these arguments will not available there.
 
-`@content` string available in `capture` and `render` callbacks and contains captured content. You can change it to any value. If you want to render some html markup with `@content`, use `html_safe` method (see below) to prevent HTML escaping.
+Inside `capture` callback you deals with sections. This mechanism described in [Sections explained](https://github.com/cybernetlab/wrap_it/raw/master/sections_explained.md) article.
 
-`@template` contains rendering template. Use this variable carefully, so if you call `@template.content_tag` or something else Rails-related, your library will not be portable to other frameworks. So, if you use this gem in user-end application, or Rails-only library, you are free to use all of `@template` methods.
+`@rendered` string available in `render` callbacks and contains rendered content. You can change it to any value. If you want to include some html markup use `html_safe` method (see below) to prevent HTML escaping.
+
+`@template` contains rendering template. Use this variable carefully, so if you call `@template.link_to` or something else Rails-related, your library will not be portable to other frameworks. So, if you use this gem in user-end application, or Rails-only library, you are free to use all of `@template` methods.
 
 *Examples*
 
@@ -112,31 +120,79 @@ end
 Including some simple HTML into content
 
 ```ruby
-class Helper < WrapIt::Base
+class IconHelper < WrapIt::Base
   after_initialize do
     @icon = optioins.delete(:icon)
   end
 
   after_capture do
     unless @icon.nil?
-      @content = html_safe("<i class=\"#{@icon}\"></i>") + @content
+      self[:content] = html_safe("<i class=\"#{@icon}\"></i>")
     end
   end
 ```
 
 ## WrapIt
 
-#### WrapIt.register(*args)
+#### WrapIt.register_module(*args)
 
-Registers helper class. In arguments, first specify helper method names as `Symbols` and in last argument fully qualified helper class name as `String`.
+Registers helpers module and defines `register` and `unregister` class methods in this module for registering helper methods. You can specify module to register in first argument. If ommited, anonymous module will be created and returned from method. Use `prefix` option to add specified prefix to all methods in helper module.
 
-#### WrapIt.unregister(*args)
+Typical usage of library and this method is:
 
-Unregisters helper class. Just pass list of method names as `Symbols`.
+1. Define empty module and register it with `register_method`:
 
-#### WrapIt.helpers
+```ruby
+module YourPerfectLib
+  module PerfectHelpers; end
 
-Returns a module, that contains all registered helpers. Usefull to provide all helpers to template engine.
+  WrapIt.register_module PerfectHelpers, prefix: 'perfect_'
+
+  # You can register all your helper methods right here, but in complex
+  # projects recommended to keep calls to register inside file where
+  # helper class defined.
+  #
+  # PerfectHelpers.register :button, 'YourPerfectLib::PerfectHelpers::Button'
+end
+```
+
+2. Describe your classes and register helper methods for it:
+
+```ruby
+module YourPerfectLib
+  module PerfectHelpers
+    class Button < WrapIt::Base
+      include WrapIt::TextContainer
+      html_class 'button'
+ 
+      ...
+    end
+  end
+
+  register :button, 'YourPerfectLib::PerfectHelpers::Button'
+end
+```
+
+3. Include it in your template (example for Rails):
+
+```ruby
+class MyController < ApplicationController
+  helper Helpers
+  ...
+end
+```
+
+4. And now use it in templates:
+
+```html
+<%= perfect_button 'button text' %>
+```
+
+will produce:
+
+```html
+<div class="button">button text</button>
+```
 
 ## WrapIt::Base
 
@@ -168,7 +224,7 @@ When `html_class` option specified and switch changes its state, HTML class for 
       
 Also `aliases` option available. So if some of aliases founded in arguments it also changes switch state. You should pass only `Symbol` or `Array` if symbols to this optioin.
 
-If block given, it will be called each time switch changes its state in context of element with the switch state as argument.
+If block given, it will be called each time switch changes its state in context of element with the switch state as argument. If you return `false`  from this block, value is ommited.
 
 #### enum(name, options = {}, &block)
 
@@ -184,7 +240,27 @@ Also `aliases` option available. So if some of aliases founded in creation optio
 
 If block given, it will be called each time enum changes its value in context of element with the new value as argument.
 
+#### section(*args)
+
+Adds one ore more sections to element. Refer to [Sections explained](https://github.com/cybernetlab/wrap_it/raw/master/sections_explained.md) article for description.
+
+#### place(src, dst)
+
+Places section `src` to destination, specified in `dst` hash. `dst` is a single key-value Hash. Key can be `:before` and `:after`. Value can be `:begin`, `:end` or any section name. Refer to [Sections explained](https://github.com/cybernetlab/wrap_it/raw/master/sections_explained.md) article for description.
+
+#### sections
+
+Returns list of all sections, including derived from parent classes.
+
+#### placement
+
+Returns placed sections.
+
 ### Instance methods
+
+#### self[name] and self[name]=
+
+Retrieves or sets `name` section. Refer to [Sections explained](https://github.com/cybernetlab/wrap_it/raw/master/sections_explained.md) article for description.
 
 #### wrap(*args, &block)
 
@@ -260,11 +336,23 @@ Removes HTML data attribute named `name`.
 
 ## WrapIt::Container
 
+This class used for elements, that can hold other elements.
+
+At first, note, that children can be created by two ways. First - inside template and second - from code. If child created from template, you have two choises again: first to keep child in place, where it defined in template, second - to cut it from there and place together with other childs. Two variables affects on this process: `ommit_content`, defined in `WrapIt::Base` and `extarct_children`. If `ommit_content` is `true`, all content will be dropped and children placed inside `children` section. If `extract_children` is true, children also placed into `children` section, but `content` is keeped.
+
+At second, you have two choises of moment, when children rendered. If `deffered_render` set to `false`, that is as default, all children will be rendered immideately after creation, so you can't change any of them later. If you plan to render your container after children, you chould set it to `true`, so childrens are collected in buffer and will be rendered with parent.
+
+All children, added to container injected with `render_to` and `parent` methods, that are gives you rendering section name and container itself.
+
 ### DSL methods
 
-#### child(*args, &block)
+#### child(name, *args, &block)
 
-Creates your own DSL method to create child items. In arguments, you should specify list of method names (aliases if more that one). Then you can specify class name for shild. If ommited, `WrapIt::Base` will be used. and as last argument you can specify array of arguments, that will be passed to child constructor. This array will be mixed with arguments, specified by user, with higher priority. At last, you can define block, that will be called after creating child, but before its rendering. This child passed as argument to block.
+Creates your own DSL method to create child items. In arguments, you should specify name of method. Then you can specify class name or class itself for child. If ommited, `WrapIt::Base` will be used. All other arguments will be mixed with arguments, specified by user and passed to child constructor. **Warning!** Make shure, that your child arguments don't begins with `String` if you ommit class argument. As workaround, don't ommit class argument and specify it as 'WrapIt::Base'. At last, you can define block, that will be called after creating child, but before its rendering. This child passed as argument to block.
+
+You can render children to section, other than `:children`. To do this, specify `section` option with section name.
+
+Look into [lib/bootstrap_it/view_helpers](https://github.com/cybernetlab/bootstrap_it/tree/master/lib/bootstrap_it/view_helpers) folder for usage examples.
 
 # Todo
 
@@ -274,6 +362,12 @@ Creates your own DSL method to create child items. In arguments, you should spec
 * Rubydoc documentation
 
 # Changes
+
+`0.2.0`
+* added: sections mechanism
+* many fixes
+* testing improvement
+* preparing testing for multiple frameworks
 
 `0.1.5`
 * fixed: switches and enums can damage instance variables
@@ -298,6 +392,25 @@ Creates your own DSL method to create child items. In arguments, you should spec
 
 `0.1.0`
 * initial version
+
+# Testing
+
+This package developed for different frameworks, so testing is not so simple. At first, prepare testing environment with:
+
+```sh
+bundle install
+bundle install --gemfile Gemfile.rails4
+bundle install --gemfile Gemfile.sinatra
+```
+
+And then you can run tests as follows:
+
+```sh
+FRAMEWORK=rails4 bundle exec rake spec
+FRAMEWORK=sinatra bundle exec rake spec
+```
+
+As sinatra support is in progress, its test will not pass yet.
 
 # License
 

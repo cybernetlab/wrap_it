@@ -14,12 +14,6 @@ describe WrapIt::Base do
     expect(successor(tag: 'p').tag).to eq 'p'
   end
 
-  it 'drops @arguments after init' do
-    expect(
-      successor.instance_variable_get(:@arguments)
-    ).to be_nil
-  end
-
   it 'extends @arguments with ArgumentsArray module' do
     args = nil
     successor_class.class_eval { after_initialize { args = @arguments } }

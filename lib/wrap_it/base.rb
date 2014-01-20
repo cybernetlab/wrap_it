@@ -24,6 +24,7 @@ module WrapIt
 
     callback :initialize, :capture, :render
 
+    include Sections
     include HTMLClass
     include HTMLData
     include Switches
@@ -34,6 +35,11 @@ module WrapIt
 
     attr_reader :tag
     attr_reader :options
+
+    section :content, :render_arguments, :render_block
+    place :content, :after, :begin
+    place :render_block, :after, :begin
+    place :render_arguments, :after, :begin
 
     def initialize(template, *args, &block)
       @template, @arguments, @block = template, args, block
@@ -50,8 +56,6 @@ module WrapIt
           self.class.get_derived(:@default_tag) || 'div'
         @tag = @tag.to_s
       end
-
-      @arguments = nil
     end
 
     def omit_content?
@@ -72,16 +76,15 @@ module WrapIt
     # @return [String] rendered HTML for element
     def render(*args, &render_block)
       # return cached copy if it available
-      return @content unless @content.nil?
-      @content = empty_html
+      return @rendered unless @rendered.nil?
 
-      do_capture
+      capture_sections
 
       # add to content string args and block result if its present
-      args.flatten.each { |a| @content << a if a.is_a? String }
+      args.flatten.each { |a| self[:render_arguments] << a if a.is_a? String }
       if block_given?
         result = instance_exec(self, &render_block) || empty_html
-        result.is_a?(String) && @content << result
+        result.is_a?(String) && self[:render_block] << result
       end
 
       do_render
@@ -89,10 +92,10 @@ module WrapIt
 
       if @template.output_buffer.nil?
         # when render called from code, just return content as a String
-        @content
+        @rendered
       else
         # in template context, write content to templates buffer
-        concat(@content)
+        concat(@rendered)
         empty_html
       end
     end
@@ -137,11 +140,15 @@ module WrapIt
 
     #
     # @dsl
-    # Defines default tag name for element. This tag can be changed soon.
+    # Defines or gets default tag name for element. This tag can be changed
+    # soon. Without parameters returns current default_tag value.
     # @param  name [<Symbol, String>] Tag name. Converted to `String`.
+    # @param  override [Boolean] Whether to override default tag value if it
+    #   allready exists.
     #
-    # @return [void]
-    def self.default_tag(name, override = true)
+    # @return [String] new default_tag value.
+    def self.default_tag(name = nil, override = true)
+      return @default_tag if name.nil?
       name.is_a?(String) || name.is_a?(Symbol) ||
         fail(ArgumentError, 'Tag name should be a String or Symbol')
       override ? @default_tag = name.to_s : @default_tag ||= name.to_s
@@ -162,29 +169,49 @@ module WrapIt
       @options = hash
     end
 
-    private
-
-    def do_capture
+    def capture_sections
       run_callbacks :capture do
-        @content ||= empty_html
-        unless @block.nil? || omit_content?
-          @content << (capture(self, &@block) || empty_html)
+        unless @block.nil?
+          captured = capture(self, &@block) || empty_html
+          omit_content? || self[:content] << captured
         end
       end
     end
+
+    def render_sections(*sections)
+      opts = sections.extract_options!
+      sections.empty? && sections = self.class.sections
+      if opts.key?(:except)
+        opts[:except].is_a?(Array) || opts[:except] = [opts[:except]]
+        sections.reject! { |s| opts[:except].include?(s) }
+      end
+      # glew sections
+      self.class.placement
+        .select { |s| sections.include?(s) }
+        .reduce(empty_html) do |a, e|
+          a << self[e]
+          self[e] = empty_html
+          a
+        end
+    end
+
+    private
 
     def do_render
       # cleanup options from empty values
       @options.select! do |k, v|
         !v.nil? && (!v.respond_to?(:empty?) || !v.empty?)
       end
+      @rendered = render_sections
       run_callbacks :render do
-        @content = content_tag(tag, @content, options)
+        @rendered = content_tag(@tag, @rendered, @options)
       end
     end
 
     def do_wrap
-      @wrapper.is_a?(Base) && @content = @wrapper.render(html_safe(@content))
+      @wrapper.is_a?(Base) && @rendered = capture do
+        @wrapper.render(html_safe(@rendered))
+      end
     end
   end
 end

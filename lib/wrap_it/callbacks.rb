@@ -12,18 +12,22 @@ module WrapIt
     end
 
     def run_callbacks(name)
-      self.class.collect_derived("@before_#{name}".to_sym).each do |cb|
+      self.class.collect_derived("@before_#{name}").each do |cb|
         if cb.is_a?(Symbol)
-          send(cb)# if respond_to?(cb)
+#          break if send(cb) == false # if respond_to?(cb)
+          send(cb) # if respond_to?(cb)
         else
+#          break if instance_eval(&cb) == false
           instance_eval(&cb)
         end
       end
       yield if block_given?
-      self.class.collect_derived("@after_#{name}".to_sym).reverse.each do |cb|
+      self.class.collect_derived("@after_#{name}").reverse.each do |cb|
         if cb.is_a?(Symbol)
-          send(cb)# if respond_to?(cb)
+#          break if send(cb) == false # if respond_to?(cb)
+          send(cb) # if respond_to?(cb)
         else
+#          break if instance_eval(&cb) == false
           instance_eval(&cb)
         end
       end
@@ -55,7 +59,8 @@ module WrapIt
             else
               instance_variable_set(var, [])
             end
-          arr << (block || method)
+          action = self == ancestors.first ? :unshift : :push
+          arr.send(action, block || method)
           instance_variable_set(var, arr)
         end
       end

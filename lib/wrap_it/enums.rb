@@ -61,7 +61,7 @@ module WrapIt
       # This method also adds getter and setter for this enum.
       #
       # @param  name [String, Symbol] Enum name. Converted to `Symbol`.
-      # @param  options = {} [Hash] Enum options
+      # @param  options [Hash] Enum options
       # @options options [String, Symbol] :html_class_prefix prefix of HTML
       #   class that will automatically added to element if enum changes its
       #   value.

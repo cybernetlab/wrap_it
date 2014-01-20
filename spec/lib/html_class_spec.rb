@@ -7,7 +7,7 @@ describe WrapIt::HTMLClass do
     wrapper_class.class_eval { html_class :a, [:b, 'c'] }
     expect(wrapper.html_class).to eq %w(a b c)
     sub_class = Class.new(wrapper_class) { html_class :a, [:d, 'e'] }
-    expect(sub_class.new(template).html_class).to eq %w(a d e b c)
+    expect(sub_class.new(template_wrapper).html_class).to eq %w(a d e b c)
   end
 
   describe '#html_class_prefix' do
@@ -23,7 +23,7 @@ describe WrapIt::HTMLClass do
     it 'returns derived value' do
       wrapper_class.class_eval { html_class_prefix 'e-' }
       sub_class = Class.new(wrapper_class)
-      expect(sub_class.new(template).html_class_prefix).to eq 'e-'
+      expect(sub_class.new(template_wrapper).html_class_prefix).to eq 'e-'
     end
   end
 
