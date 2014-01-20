@@ -101,7 +101,7 @@ Inside callbacks some usefull instance variables available.
 
 `@arguments` array available only in `after_initialize` callback and contains creation arguments. Its recommended to extract arguments, related to your class from this array if you plan to subclass your helper in future, so when subclasses `after_initialize` called these arguments will not available there.
 
-Inside `capture` callback you deals with sections. This mechanism described in [Sections explained](https://github.com/cybernetlab/wrap_it/raw/master/sections_explained.md) article.
+Inside `capture` callback you deals with sections. This mechanism described in [Sections explained](https://github.com/cybernetlab/wrap_it/blob/master/sections_explained.md) article.
 
 `@rendered` string available in `render` callbacks and contains rendered content. You can change it to any value. If you want to include some html markup use `html_safe` method (see below) to prevent HTML escaping.
 
@@ -242,11 +242,11 @@ If block given, it will be called each time enum changes its value in context of
 
 #### section(*args)
 
-Adds one ore more sections to element. Refer to [Sections explained](https://github.com/cybernetlab/wrap_it/raw/master/sections_explained.md) article for description.
+Adds one ore more sections to element. Refer to [Sections explained](https://github.com/cybernetlab/wrap_it/blob/master/sections_explained.md) article for description.
 
 #### place(src, dst)
 
-Places section `src` to destination, specified in `dst` hash. `dst` is a single key-value Hash. Key can be `:before` and `:after`. Value can be `:begin`, `:end` or any section name. Refer to [Sections explained](https://github.com/cybernetlab/wrap_it/raw/master/sections_explained.md) article for description.
+Places section `src` to destination, specified in `dst` hash. `dst` is a single key-value Hash. Key can be `:before` and `:after`. Value can be `:begin`, `:end` or any section name. Refer to [Sections explained](https://github.com/cybernetlab/wrap_it/blob/master/sections_explained.md) article for description.
 
 #### sections
 
@@ -260,7 +260,7 @@ Returns placed sections.
 
 #### self[name] and self[name]=
 
-Retrieves or sets `name` section. Refer to [Sections explained](https://github.com/cybernetlab/wrap_it/raw/master/sections_explained.md) article for description.
+Retrieves or sets `name` section. Refer to [Sections explained](https://github.com/cybernetlab/wrap_it/blob/master/sections_explained.md) article for description.
 
 #### wrap(*args, &block)
 
