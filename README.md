@@ -140,7 +140,7 @@ Registers helpers module and defines `register` and `unregister` class methods i
 
 Typical usage of library and this method is:
 
-1. Define empty module and register it with `register_method`:
+Define empty module and register it with `register_method`:
 
 ```ruby
 module YourPerfectLib
@@ -156,7 +156,7 @@ module YourPerfectLib
 end
 ```
 
-2. Describe your classes and register helper methods for it:
+Describe your classes and register helper methods for it:
 
 ```ruby
 module YourPerfectLib
@@ -173,7 +173,7 @@ module YourPerfectLib
 end
 ```
 
-3. Include it in your template (example for Rails):
+Include it in your template (example for Rails):
 
 ```ruby
 class MyController < ApplicationController
@@ -182,7 +182,7 @@ class MyController < ApplicationController
 end
 ```
 
-4. And now use it in templates:
+And now use it in templates:
 
 ```html
 <%= perfect_button 'button text' %>
