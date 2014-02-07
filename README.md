@@ -1,6 +1,7 @@
 [![Gem Version](https://badge.fury.io/rb/wrap_it.png)](http://badge.fury.io/rb/wrap_it)
 [![Code Climate](https://codeclimate.com/github/cybernetlab/wrap_it.png)](https://codeclimate.com/github/cybernetlab/wrap_it)
 [![Build Status](https://travis-ci.org/cybernetlab/wrap_it.png?branch=master)](https://travis-ci.org/cybernetlab/wrap_it)
+[![Coverage Status](https://coveralls.io/repos/cybernetlab/wrap_it/badge.png?branch=master)](https://coveralls.io/r/cybernetlab/wrap_it?branch=master)
 
 # WrapIt
 

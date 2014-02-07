@@ -76,7 +76,7 @@ module WrapIt
     #     {Sections} module for details.
     #
     # @return [String]
-    def self.child(name, *args, &block)
+    def self.child(name, *args, option: nil, **opts, &block)
       name.is_a?(String) && name.to_sym
       name.is_a?(Symbol) || fail(ArgumentError, 'Wrong child name')
       child_class =
@@ -87,35 +87,15 @@ module WrapIt
         end
       child_class = child_class.name if child_class.is_a?(Class)
 
-      opts = args.extract_options!
-      extract = opts.delete(:option)
-      args << opts
-
-      define_method name do |*helper_args, &helper_block|
-        # We should clone arguments becouse if we have loop in template,
-        # `extract_options!` below works only for first iterration
-        default_args = args.clone
-        options = helper_args.extract_options!
-        options[:helper_name] = name
-        options.merge!(default_args.extract_options!)
-        helper_args += default_args + [options]
-        add_children(name, child_class, block, *helper_args, &helper_block)
+      define_method name do |*hargs, extracted: false, **hopts, &hblock|
+        hargs += args
+        hopts.merge!(opts)
+        hopts[:helper_name] = name
+        child = prepare_child(child_class, block, *hargs, **hopts, &hblock)
+        add_children(name, child, extracted: extracted)
       end
 
-      unless extract.nil?
-        extract.is_a?(Array) || extract = [extract]
-        extract.each do |opt_name|
-          opt_name = name if opt_name == true
-          option(opt_name) do |_, arguments|
-            self.deffered_render = true
-            arguments.is_a?(Array) || arguments = [arguments]
-            o = arguments.extract_options!
-            o.merge!(extracted: true)
-            arguments << o
-            send name, *arguments
-          end
-        end
-      end
+      add_child_option(name, option)
     end
 
     after_capture do
@@ -145,27 +125,11 @@ module WrapIt
     CONTENT_SPLIT_REGEXP = /(<!-- WrapIt::Container\(\h+\) -->)/
     CONTENT_REPLACE_REGEXP = /\A<!-- WrapIt::Container\((?<obj_id>\h+)\) -->\z/
 
-    def add_children(name, helper_class, class_block, *args, &helper_block)
-      options = args.extract_options!
-      section = options.delete(:section) || :children
-      extracted = options.delete(:extracted) == true
-      args << options
-      item = Object
-        .const_get(helper_class)
-        .new(@template, *args, &helper_block)
-      item.instance_variable_set(:@render_to, section)
-      item.instance_variable_set(:@parent, self)
-      item.define_singleton_method(:render_to) { @render_to }
-      item.define_singleton_method(:render_to=) do |value|
-        self.class.sections.include?(value) && @render_to = value
-      end
-      item.define_singleton_method(:parent) { @parent }
-      class_block.nil? || instance_exec(item, &class_block)
-
+    def add_children(name, item, extracted: false)
       deffered_render? && @children << item
-      return if extracted
+      return if extracted == true
       if !deffered_render? && (omit_content? || extract_children?)
-        self[section] << capture { item.render }
+        self[item.render_to] << capture { item.render }
       end
       if omit_content? || extract_children?
         empty_html
@@ -174,6 +138,38 @@ module WrapIt
           html_safe("<!-- WrapIt::Container(#{item.object_id.to_s(16)}) -->")
         else
           item.render
+        end
+      end
+    end
+
+    def prepare_child(helper_class, class_block, *args,
+                      section: nil, **opts,
+                      &helper_block)
+      section ||= :children
+      item = Object
+        .const_get(helper_class)
+        .new(@template, *args, **opts, &helper_block)
+      item.instance_variable_set(:@render_to, section)
+      item.instance_variable_set(:@parent, self)
+      item.define_singleton_method(:render_to) { @render_to }
+      item.define_singleton_method(:render_to=) do |value|
+        self.class.sections.include?(value) && @render_to = value
+      end
+      item.define_singleton_method(:parent) { @parent }
+      class_block.nil? || instance_exec(item, &class_block)
+      item
+    end
+
+    def self.add_child_option(name, option)
+      return if option.nil?
+      option.is_a?(Array) || option = [option]
+      option.each do |opt_name|
+        opt_name = name if opt_name == true
+        option(opt_name) do |_, args|
+          self.deffered_render = true
+          args.is_a?(Array) || args = [args]
+          opts = args.extract_options!
+          send(name, *args, extracted: true, **opts)
         end
       end
     end
