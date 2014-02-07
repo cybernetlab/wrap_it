@@ -24,4 +24,7 @@ require 'rspec/core/rake_task'
 # end
 
 #YARD::Rake::YardocTask.new
-RSpec::Core::RakeTask.new
+
+RSpec::Core::RakeTask.new(:spec)
+
+task :default => :spec

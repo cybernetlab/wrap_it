@@ -3,4 +3,7 @@ rvm:
   - 2.0.0-p353
   - 2.1.0
   - ruby-head
-
+env:
+  - FRAMEWORK=rails4
+  - FRAMEWORK=rails4
+  - FRAMEWORK=rails4
