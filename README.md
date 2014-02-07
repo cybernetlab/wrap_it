@@ -94,7 +94,7 @@ Library have no specific configuration.
 
 # Usage
 
-Now, package is well documented, so make sure to inspect [Reference documentation]()
+Now, package is well documented, so make sure to inspect [Reference documentation](http://rubydoc.info/github/cybernetlab/wrap_it/frames)
 
 > This library actively used in [BootstrapIt](https://github.com/cybernetlab/bootstrap_it) package, so explore this project, especially it's [lib/bootstrap_it/view_helpers](https://github.com/cybernetlab/bootstrap_it/tree/master/lib/bootstrap_it/view_helpers) folder for usage examples.
 
@@ -102,7 +102,7 @@ All helpers classes derived from `WrapIt::Base` class, that provides allmost all
 
 Simple example explained above. More complex usage is to provide some logic to initalization, capturing and rendering process. To do this, use `after` or `before` `initialize`, `capture` and `reder` callbacks respectively. Usually `after` callbacks used. `initialize` callbacks runs around arguments and optioins parsing, `capture` callbacks runs around capturing element sections and `render` callbacks runs around wrapping content into element tag.
 
-Also, please inspect arguments [module documentation]() for details about creation arguments and options.
+Also, please inspect arguments [module documentation](http://rubydoc.info/github/cybernetlab/wrap_it/WrapIt/Arguments) for details about creation arguments and options.
 
 Inside callbacks some usefull instance variables available.
 
@@ -112,9 +112,9 @@ Inside callbacks some usefull instance variables available.
 
 `html_data` contains HTML data hash.
 
-`html_class` contains array of HTML classes and provides array-like acces to its. See [class documentation]() for details.
+`html_class` contains array of HTML classes and provides array-like acces to its. See [class documentation](http://rubydoc.info/github/cybernetlab/wrap_it/WrapIt/HTMLClass) for details.
 
-Inside `capture` callback you deals with sections. This mechanism explained in [module documentation]().
+Inside `capture` callback you deals with sections. This mechanism explained in [module documentation](http://rubydoc.info/github/cybernetlab/wrap_it/WrapIt/Sections).
 
 `template` contains rendering template. Use this variable carefully, so if you call `template.link_to` or something else Rails-related, your library will not be portable to other frameworks. So, if you use this gem in user-end application, or Rails-only library, you are free to use all of `template` methods.
 
@@ -347,7 +347,7 @@ element.html_class.include? { |x| x == 'a' } #=> true
 ```
 
 
-Look to [Reference documentation]() for other classes description.
+Look to [Reference documentation](http://rubydoc.info/github/cybernetlab/wrap_it/frames) for other classes description.
 
 # Todo
 
