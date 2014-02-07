@@ -186,12 +186,11 @@ module WrapIt
       end
     end
 
-    def render_sections(*sections)
-      opts = sections.extract_options!
+    def render_sections(*sections, except: nil)
       sections.empty? && sections = self.class.sections
-      if opts.key?(:except)
-        opts[:except].is_a?(Array) || opts[:except] = [opts[:except]]
-        sections.reject! { |s| opts[:except].include?(s) }
+      unless except.nil?
+        except.is_a?(Array) || except = [except]
+        sections.reject! { |s| except.include?(s) }
       end
       # glew sections
       self.class.placement

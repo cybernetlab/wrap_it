@@ -358,6 +358,12 @@ Look to [Reference documentation](http://rubydoc.info/github/cybernetlab/wrap_it
 
 # Changes
 
+`1.0.1`
+* refactor some code to remove complexity
+* code now tested with [travis](https://travis-ci.org/cybernetlab/wrap_it)
+* code now checked for test coverage by [coveralls](https://coveralls.io/r/cybernetlab/wrap_it)
+* code quality now checked by [codeclimate](https://codeclimate.com/github/cybernetlab/wrap_it)
+
 `1.0.0`
 * first release version
 * a lot of code refactored
