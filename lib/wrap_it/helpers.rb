@@ -1,9 +1,64 @@
 #
-# Helper registering
+# Registering helpers
+#
+# To use your classes and helpers in templates you should register your
+# library. First, in your framework initialization, you should register
+# your library in WrapIt. You can have separate module for it or WrapIt
+# will make anonymous one. After this, your module will have `register`
+# and `unregister` methods to register your classes.
+#
+# @example usual case - library in separate module
+#   # initialization time
+#   module Library
+#     module Helpers; end
+#   end
+#   WrapIt.register_module Library::Helpers, prefix: 'lib_'
+#
+#   # controller
+#   class MyController < ApplicationController
+#     helper Library::Helpers
+#   end
+#
+#   # implementation
+#   module Library
+#     module Helpers
+#       class Button < WrapIt::Base
+#         ...
+#       end
+#
+#       register :super_button, Button
+#     end
+#   end
+#
+#   # in template:
+#   <%= lib_super_button 'text' %>
+#
+# @example anonymous module
+#   helpers = WrapIt.register_module prefix: 'lib_'
+#
+#   class Button < WrapIt::Base
+#     ...
+#   end
+#
+#   helpers.register :super_button, Button
+#
+#   class MyController
+#     helper helpers
+#   end
 #
 # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
 #
 module WrapIt
+  #
+  # Registers helpers module
+  #
+  # @overload register_module(mod = nil, opts = {})
+  #   @param  mod [Module] module for register. Anonymous module will be
+  #     created if ommited.
+  #   @param  opts [Hash] options
+  #   @option opts [String] :prefix prefix for helper methods
+  #
+  # @return [void]
   def self.register_module(*args)
     options = args.extract_options!
     options.symbolize_keys!
@@ -16,6 +71,16 @@ module WrapIt
     end
     mod
   end
+
+  # @!method register([name, ...], class_name)
+  # adds to template list of helpers for creating elements of specified class
+  # @param name [Symbol, String] name of helper. Will be prefixed with prefix
+  #   option, specified in {WrapIt#register_module} call.
+  # @param class_name [String, Class] element class
+
+  # @!method unregister([name, ...])
+  # removes list of helpers from template
+  # @param name [Symbol, String] name of helper to remove from tampate
 
   private
 

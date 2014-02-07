@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe WrapIt::Base do
+describe WrapIt::Base, type: :wrapped do
   it 'includes framework-specific methods' do
     methods = successor_class.protected_instance_methods(true)
     expect(methods).to include :concat, :capture, :output_buffer
@@ -58,7 +58,7 @@ describe WrapIt::Base do
     it 'wraps with block' do
       render <<-EOL
         <%= helper(tag: :p) { |s| s.wrap do
-          |w| w.add_html_class 'nav'
+          |w| w.html_class << 'nav'
         end } %>'
       EOL
       expect(rendered).to have_tag 'div.nav > p'

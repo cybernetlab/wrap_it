@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe WrapIt::Switches do
+describe WrapIt::Switches, type: :wrapped do
   it_behaves_like 'Base module'
 
   context 'wrapper have `active` switch' do
@@ -24,12 +24,12 @@ describe WrapIt::Switches do
       expect(wrapper(active: true).active?).to be_true
       @wrapper = nil
       expect(wrapper(active: false).active?).to be_false
-      expect(wrapper.options).to_not include :active
+      expect(wrapper.html_attr).to_not include :active
     end
 
     it 'runs block' do
       wrapper_class.class_eval do
-        switch(:active) { |x| add_html_class(x.to_s) }
+        switch(:active) { |x| html_class << x.to_s }
       end
       expect(wrapper(:active).html_class).to include 'true'
       @wrapper = nil

@@ -19,59 +19,79 @@ module WrapIt
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   class Base
+    # Documentation includes
+    #
+    # @!parse extend  Arguments::ClassMethods
+    # @!parse extend  Enums::ClassMethods
+    # @!parse extend  HTML::ClassMethods
+    # @!parse extend  Sections::ClassMethods
+    # @!parse extend  Switches::ClassMethods
+
+    #
+    # include appropriate functionality from modules
     include DerivedAttributes
     include Callbacks
 
     callback :initialize, :capture, :render
 
+    include Arguments
     include Sections
-    include HTMLClass
-    include HTMLData
+    include HTML
     include Switches
     include Enums
     include Renderer
 
     @omit_content = false
 
-    attr_reader :tag
-    attr_reader :options
-
+    attr_reader :helper_name
+    option :helper_name
+    option :tag
     section :content, :render_arguments, :render_block
     place :content, :after, :begin
     place :render_block, :after, :begin
     place :render_arguments, :after, :begin
 
     def initialize(template, *args, &block)
-      @template, @arguments, @block = template, args, block
-      self.options = @arguments.extract_options!
-
-      @helper_name = @options.delete(:helper_name)
-      @helper_name.is_a?(String) && @helper_name = @helper_name.to_sym
-
-      @arguments.extend ArgumentsArray
+      @template, @block = template, block
       add_default_classes
-
       run_callbacks :initialize do
-        @tag = @options.delete(:tag) ||
-          self.class.get_derived(:@default_tag) || 'div'
-        @tag = @tag.to_s
+        capture_arguments!(args, &block)
+        # TODO: uncomment following after html_attr implementation finished
+        #html_attr.merge!(args.extract_options!)
+        self.html_attr = args.extract_options!
+        # TODO: find convenient way to save unprocessed arguments
+        @arguments = args
       end
     end
 
+    def tag
+      @tag ||= (self.class.get_derived(:@default_tag) || 'div').to_s
+    end
+
+    def tag=(value)
+      value.is_a?(Symbol) && value = value.to_s
+      value.is_a?(String) && @tag = value
+    end
+
+    def helper_name=(value)
+      value.is_a?(String) && value = value.to_sym
+      value.is_a?(Symbol) && @helper_name = value
+    end
+
     def omit_content?
-      self.class.get_derived(:@omit_content)
+      self.class.get_derived(:@omit_content) == true
     end
 
     #
     # Renders element to template
     #
-    # @override render([content, ...])
-    # @param  content [String] additional content that will be appended
-    #                          to element content
-    # @yield [element] Runs block after capturing element content and before
-    #                  rendering it. Returned value appended to content.
-    # @yieldparam element [Base] rendering element.
-    # @yieldreturn [String, nil] content to append to HTML
+    # @overload render([content, ...])
+    #   @param content [String] additional content that will be appended
+    #                           to element content
+    #   @yield [element] Runs block after capturing element content and before
+    #                    rendering it. Returned value appended to content.
+    #   @yieldparam element [Base] rendering element.
+    #   @yieldreturn [String, nil] content to append to HTML
     #
     # @return [String] rendered HTML for element
     def render(*args, &render_block)
@@ -110,17 +130,17 @@ module WrapIt
     #
     # If block present, it will be called when wrapper will rendered.
     #
-    # @override wrap(wrapper)
-    # @param  wrapper [Base] wrapper instance.
+    # @overload wrap(wrapper)
+    #   @param  wrapper [Base] wrapper instance.
     #
-    # @override wrap(wrapper_class, [arg, ...], options = {})
-    # @param  wrapper_class [Class] WrapIt::Base subclass for wrapper.
-    # @param  arg [String, Symbol] wrapper creation arguments.
-    # @param  options [Hash] wrapper creation options.
+    # @overload wrap(wrapper_class, [arg, ...], options = {})
+    #   @param  wrapper_class [Class] WrapIt::Base subclass for wrapper.
+    #   @param  arg [String, Symbol] wrapper creation arguments.
+    #   @param  options [Hash] wrapper creation options.
     #
-    # @override wrap([arg, ...], options = {})
-    # @param  arg [String, Symbol] wrapper creation arguments.
-    # @param  options [Hash] wrapper creation options.
+    # @overload wrap([arg, ...], options = {})
+    #   @param  arg [String, Symbol] wrapper creation arguments.
+    #   @param  options [Hash] wrapper creation options.
     #
     # @return [void]
     def wrap(*args, &block)
@@ -139,7 +159,6 @@ module WrapIt
     protected
 
     #
-    # @dsl
     # Defines or gets default tag name for element. This tag can be changed
     # soon. Without parameters returns current default_tag value.
     # @param  name [<Symbol, String>] Tag name. Converted to `String`.
@@ -156,17 +175,6 @@ module WrapIt
 
     def self.omit_content
       @omit_content = true
-    end
-
-    def options=(hash)
-      hash.is_a?(Hash) || return
-      hash.symbolize_keys!
-
-      # sanitize class
-      hash[:class] ||= []
-      hash[:class] = [hash[:class]] unless hash[:class].is_a?(Array)
-      hash[:class] = hash[:class].map { |c| c.to_s }.uniq
-      @options = hash
     end
 
     def capture_sections
@@ -199,12 +207,13 @@ module WrapIt
 
     def do_render
       # cleanup options from empty values
-      @options.select! do |k, v|
+      html_attr.select! do |k, v|
         !v.nil? && (!v.respond_to?(:empty?) || !v.empty?)
       end
       @rendered = render_sections
       run_callbacks :render do
-        @rendered = content_tag(@tag, @rendered, @options)
+        options = html_attr.merge(class: html_class.to_html, data: html_data)
+        @rendered = content_tag(tag, @rendered, options)
       end
     end
 

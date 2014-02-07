@@ -1,25 +1,38 @@
+require 'delegate'
+
 module WrapIt
   #
-  # Provides methods related to HTML `data` attribute
+  # Provides hash-like access to HTML data.
   #
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
-  module HTMLData
-    def self.included(base)
-      base == Base || fail(
-        TypeError,
-        "#{self.class.name} can be included only into WrapIt::Base"
-      )
+  class HTMLData < DelegateClass(Hash)
+    #
+    # Sanitizes html data
+    #
+    # @overload sanitize(values = {})
+    #   @param  values [Hash] hash to sanitize
+    #
+    # @return [Hash] sanitized hash
+    def self.sanitize(**values)
+      Hash[values
+        .map do |k, v|
+          k = k.to_s
+          if k.include?('-')
+            k, n = k.split(/-/, 2)
+            v = sanitize(n.to_sym => v)
+          else
+            k = k.downcase.gsub(/[^a-z0-9_]+/, '').gsub(/\A\d+/, '')
+            v = v.is_a?(Hash) ? sanitize(v) : v.to_s
+          end
+          k.empty? ? nil : [k.to_sym, v]
+        end
+        .compact
+      ]
     end
 
-    def set_html_data(name, value)
-      @options[:data] ||= {}
-      @options[:data][name.to_sym] = value
-    end
-
-    def remove_html_data(name)
-      return unless @options[:data].is_a?(Hash)
-      @options[:data].delete(name.to_sym)
+    def initialize(**value)
+      super(HTMLData.sanitize(**value))
     end
   end
 end

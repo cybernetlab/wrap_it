@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe WrapIt::DerivedAttributes do
+describe WrapIt::DerivedAttributes, type: :wrapped do
   describe '::get_derived' do
     it 'retrieves nil by default' do
       expect(wrapper_class.get_derived(:@var)).to be_nil

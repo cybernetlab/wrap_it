@@ -1,23 +1,23 @@
-require 'wrap_it/frameworks'
+require File.join %w(wrap_it frameworks)
 
 if WrapIt.rails?
   require 'rails'
-  require 'wrap_it/rails'
+  require File.join %w(wrap_it rails)
 else
-  require 'wrap_it/no_rails'
+  require File.join %w(wrap_it no_rails)
 end
 
-require 'wrap_it/helpers'
+require File.join %w(wrap_it helpers)
 
-require 'wrap_it/derived_attributes'
-require 'wrap_it/callbacks'
-require 'wrap_it/sections'
-require 'wrap_it/arguments_array'
-require 'wrap_it/html_class'
-require 'wrap_it/html_data'
-require 'wrap_it/switches'
-require 'wrap_it/enums'
-require 'wrap_it/base'
-require 'wrap_it/container'
-require 'wrap_it/text_container'
-require 'wrap_it/link'
+require File.join %w(wrap_it derived_attributes)
+require File.join %w(wrap_it callbacks)
+require File.join %w(wrap_it capture_array)
+require File.join %w(wrap_it arguments)
+require File.join %w(wrap_it sections)
+require File.join %w(wrap_it html)
+require File.join %w(wrap_it switches)
+require File.join %w(wrap_it enums)
+require File.join %w(wrap_it base)
+require File.join %w(wrap_it container)
+require File.join %w(wrap_it text_container)
+require File.join %w(wrap_it link)

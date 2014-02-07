@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe WrapIt::TextContainer do
+describe WrapIt::TextContainer, type: :wrapped do
   it { expect(wrapper_class.default_tag).to eq 'p' }
 
   %i(text body).each do |option|
@@ -9,7 +9,7 @@ describe WrapIt::TextContainer do
     end
 
     it "cleanups `#{option}` for options" do
-      expect(wrapper(option => 'text').options).to_not include option
+      expect(wrapper(option => 'text').html_attr).to_not include option
     end
   end
 

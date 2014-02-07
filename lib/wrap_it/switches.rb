@@ -5,40 +5,28 @@ module WrapIt
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   module Switches
+    # Documentation includes
+    # @!parse extend  Switches::ClassMethods
+
+    # module implementation
+
     extend DerivedAttributes
 
+    #
     def self.included(base)
       base == Base || fail(
         TypeError,
         "#{self.class.name} can be included only into WrapIt::Base"
       )
       base.extend ClassMethods
-      base.after_initialize :switches_init
-    end
-
-    private
-
-    def switches_init
-      @switches = {}
-      keys = switches.keys
-      @options.keys.select { |o| keys.include?(o) }.each do |switch|
-        send("#{switches[switch][:name]}=", @options.delete(switch) == true)
-      end
-      @arguments.extract!(Symbol, and: [keys]).each do |switch|
-        send("#{switches[switch][:name]}=", true)
-      end
-    end
-
-    def switches
-      @switches_hash ||= self.class.collect_derived(:@switches, {}, :merge)
+      base.before_initialize { @switches = {} }
     end
 
     #
-    # Class methods to include
+    # {Switches} class methods
     #
     module ClassMethods
       #
-      # @dsl
       # Adds `switch`. Switch is a boolean flag. When element created, creation
       # arguments will be scanned for `Symbol`, that equals to `name`. If
       # it founded, switch turned on. Also creation options inspected. If
@@ -57,11 +45,11 @@ module WrapIt
       # on or removed in other case.
       #
       # @param  name [String, Symbol] Switch name. Converted to `Symbol`.
-      # @param  opts [Hash] Switch options
-      # @options opts [true, String, Symbol, Array<String, Symbol>] :html_class
+      # @param  options [Hash] Switch options
+      # @option options [true, String, Symbol, Array<String, Symbol>] :html_class
       #   HTML classes list that will automatically added to element if switch
       #   is on or removed from element if switch id off.
-      # @options opts [Symbol, Array<Symbol>] :aliases list of aliases.
+      # @option options [Symbol, Array<Symbol>] :aliases list of aliases.
       #   Warning! Values are not converted - pass only `Symbols` here.
       # @yield [state] Runs block when switch state changed, gives it to block.
       # @yieldparam state [Boolean] Whether switch is on or off.
@@ -83,11 +71,28 @@ module WrapIt
               end
             end
         end
-        names = [name] + [[options[:aliases]] || []].flatten.compact
+
         define_method("#{name}?") { @switches[name] == true }
         define_method("#{name}=", &Switches.setter(name, &block))
         @switches ||= {}
-        names.each { |n| @switches[n] = options }
+
+        @switches[name] = options
+
+        o_params = {}
+        a_params = { if: Symbol, and: name }
+        if options.key?(:aliases)
+          aliases = [options[:aliases]].flatten.compact
+          o_params[:if] = [name] + aliases
+          a_params[:and] = [name] + aliases
+        end
+
+        option(name, **o_params) do |_, v|
+          send("#{options[:name]}=", v == true)
+        end
+
+        argument(name, **a_params) do |_, _|
+          send("#{options[:name]}=", true)
+        end
       end
     end
 
@@ -96,19 +101,18 @@ module WrapIt
     #
     # Makes switch setter block
     # @param  name [String] switch name
-    # @param  &block [Proc] switch block
     #
     # @return [Proc] switch setter block
     def self.setter(name, &block)
       proc do |value|
-        opts = switches[name]
+        opts = self.class.collect_derived(:@switches, {}, :merge)[name]
         cb_return = block.nil? || instance_exec(value == true, &block)
         unless cb_return == false
           @switches[name] = value == true
           if value == true
-            opts.key?(:html_class) && add_html_class(*opts[:html_class])
+            opts.key?(:html_class) && html_class << opts[:html_class]
           else
-            opts.key?(:html_class) && remove_html_class(*opts[:html_class])
+            opts.key?(:html_class) && html_class.delete(*opts[:html_class])
           end
         end
       end

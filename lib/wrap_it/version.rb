@@ -1,4 +1,5 @@
 #
 module WrapIt
-  VERSION = '0.2.0'
+  # Current gem version
+  VERSION = '1.0.0'
 end

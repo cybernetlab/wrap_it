@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe WrapIt::Link do
+describe WrapIt::Link, type: :wrapped do
   it 'has `a` tag by default' do
     expect(successor.tag).to eq 'a'
   end
@@ -20,6 +20,6 @@ describe WrapIt::Link do
 
   it 'takes href from second string arg if no block given' do
     expect(successor('text', 'url').href).to eq 'url'
-    expect(successor.instance_variable_get(:@body)).to eq 'text'
+    expect(successor.body).to eq 'text'
   end
 end

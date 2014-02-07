@@ -85,8 +85,8 @@ describe WrapIt::Container do
   end
 
   it 'extracts one child from optioins' do
-    successor_class.class_eval { extract_from_options :item, :item }
-    render '<%= helper item: {class: "list-item"} %>'
-    expect(rendered).to have_tag 'ul > li.list-item', count: 1
+    successor_class.class_eval { child :item1, tag: 'li', option: true }
+    render '<%= helper item1: {class: "listitem"} %>'
+    expect(rendered).to have_tag 'ul > li.listitem', count: 1
   end
 end

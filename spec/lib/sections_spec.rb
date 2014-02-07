@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe WrapIt::Sections do
+describe WrapIt::Sections, type: :wrapped do
   it_behaves_like 'Base module'
 
   describe 'self.section' do

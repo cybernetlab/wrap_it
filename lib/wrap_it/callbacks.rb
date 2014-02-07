@@ -5,38 +5,57 @@ module WrapIt
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   module Callbacks
+    # Documentation includes
+    # @!parse extend  Callbacks::ClassMethods
+
+    # module implementation
+
     extend DerivedAttributes
 
+    #
     def self.included(base)
       base.extend ClassMethods
     end
 
+    #
+    # Runs specified callbacks with block
+    #
+    # Runs first `before` callbacks in inheritance order, then yields block if
+    # it given and then `after` callbacks in reverse order.
+    #
+    # @param  name [Symbol] callback name, that should be defined by
+    #   {ClassMethods#callback callback} method.
+    #
+    # @return [void]
     def run_callbacks(name)
       self.class.collect_derived("@before_#{name}").each do |cb|
         if cb.is_a?(Symbol)
-#          break if send(cb) == false # if respond_to?(cb)
           send(cb) # if respond_to?(cb)
         else
-#          break if instance_eval(&cb) == false
           instance_eval(&cb)
         end
       end
       yield if block_given?
       self.class.collect_derived("@after_#{name}").reverse.each do |cb|
         if cb.is_a?(Symbol)
-#          break if send(cb) == false # if respond_to?(cb)
           send(cb) # if respond_to?(cb)
         else
-#          break if instance_eval(&cb) == false
           instance_eval(&cb)
         end
       end
     end
 
     #
-    # Class methods to include
+    # {Callbacks} class methods
     #
     module ClassMethods
+      #
+      # Defines callback
+      #
+      # @overload callback([name, ...])
+      #   @param  name [Symbol, String] callback name
+      #
+      # @return [void]
       def callback(*args)
         args.each do |name|
           instance_eval(&Callbacks.define_callback(:before, name))

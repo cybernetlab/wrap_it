@@ -1,19 +1,28 @@
+[![Gem Version](https://badge.fury.io/rb/wrap_it.png)](http://badge.fury.io/rb/wrap_it)
+[![Code Climate](https://codeclimate.com/github/cybernetlab/wrap_it.png)](https://codeclimate.com/github/cybernetlab/wrap_it)
+
 # WrapIt
 
 This library provides set of classes and modules with simple DSL for quick and easy creating html helpers with your own DSL. It's usefull for implementing CSS frameworks, or making your own.
 
+> Required ruby version is 2.0.0
+
+> **Warning** A lot of code refactored. API changed. Review you code if you using previous versions of library.
+
 For example, your designer makes perfect button style for some site. This element will appears in many places of site in some variations. The button have `danger`, `success` and `default` look, and can have `active` state. Button can have some icon. So, you make some CSS styles, and now you should place HTML markup of this element in many places of site. With `wrap_it` library you can do it with following code:
 
 ```ruby
+module Helpers; end
+
 WrapIt.register_module Helpers
 
 module Helpers
   class PerfectButton < WrapIt::Container
     include TextContainer
     html_class 'button'
-    enum :look, [:default, :success, :danger], html_class_prefix: 'button-'
+    enum :look, %i(default success danger), html_class_prefix: 'button-'
     switch :active, html_class: 'button-active'
-    child :icon, [tag: 'img', class: 'button-icon']
+    child :icon, tag: 'img', class: 'button-icon'
   end
 
   register :p_button, 'PerfectButton'
@@ -55,11 +64,9 @@ This will produce following code:
 
 Note, that lines 2 and 3 produces same html markup.
 
-> **Wraning!** Module registration process changed since 0.2.0. So, if you migrate from 0.1.5, look above examples again and fix your startup code.
-
 # Status
 
-Project in pre-release state. First release version `1.0.0` planned to February of 2014.
+This is a first release version - `1.0.0`.
 
 # Installation
 
@@ -87,25 +94,29 @@ Library have no specific configuration.
 
 # Usage
 
+Now, package is well documented, so make sure to inspect [Reference documentation]()
+
 > This library actively used in [BootstrapIt](https://github.com/cybernetlab/bootstrap_it) package, so explore this project, especially it's [lib/bootstrap_it/view_helpers](https://github.com/cybernetlab/bootstrap_it/tree/master/lib/bootstrap_it/view_helpers) folder for usage examples.
 
-All helpers classes derived from `WrapIt::Base` class, that provides allmost all functionality. For helpers, thats includes other helpers, use `WrapIt::Container` class. Where are some library-specific methods, defined directly in `WrapIt` module.
+All helpers classes derived from `WrapIt::Base` class, that provides allmost all functionality. For helpers, thats includes other helpers, use `WrapIt::Container` class.
 
 Simple example explained above. More complex usage is to provide some logic to initalization, capturing and rendering process. To do this, use `after` or `before` `initialize`, `capture` and `reder` callbacks respectively. Usually `after` callbacks used. `initialize` callbacks runs around arguments and optioins parsing, `capture` callbacks runs around capturing element sections and `render` callbacks runs around wrapping content into element tag.
 
+Also, please inspect arguments [module documentation]() for details about creation arguments and options.
+
 Inside callbacks some usefull instance variables available.
 
-`@tag` contains tag name for element.
+`tag` contains tag name for element.
 
-`@options` contains creation options hash. This hash also contains `:class` key with current set of HTML classes. But its recommended to use class-aware methods to manipulate html classes (see below). **Warning!** You **MUST** remove from this hash all your class-specific user options, because this hash will be used as list of HTML attributes of element.
+`html_attr` contains HTML attributes hash.
 
-`@arguments` array available only in `after_initialize` callback and contains creation arguments. Its recommended to extract arguments, related to your class from this array if you plan to subclass your helper in future, so when subclasses `after_initialize` called these arguments will not available there.
+`html_data` contains HTML data hash.
 
-Inside `capture` callback you deals with sections. This mechanism described in [Sections explained](https://github.com/cybernetlab/wrap_it/blob/master/sections_explained.md) article.
+`html_class` contains array of HTML classes and provides array-like acces to its. See [class documentation]() for details.
 
-`@rendered` string available in `render` callbacks and contains rendered content. You can change it to any value. If you want to include some html markup use `html_safe` method (see below) to prevent HTML escaping.
+Inside `capture` callback you deals with sections. This mechanism explained in [module documentation]().
 
-`@template` contains rendering template. Use this variable carefully, so if you call `@template.link_to` or something else Rails-related, your library will not be portable to other frameworks. So, if you use this gem in user-end application, or Rails-only library, you are free to use all of `@template` methods.
+`template` contains rendering template. Use this variable carefully, so if you call `template.link_to` or something else Rails-related, your library will not be portable to other frameworks. So, if you use this gem in user-end application, or Rails-only library, you are free to use all of `template` methods.
 
 *Examples*
 
@@ -113,7 +124,7 @@ Prevent user from changing element tag:
 
 ```ruby
 class Helper < WrapIt::Base
-  after_initialize { @tag = 'table' }
+  after_initialize { self.tag = 'table' }
 end
 ```
 
@@ -121,9 +132,8 @@ Including some simple HTML into content
 
 ```ruby
 class IconHelper < WrapIt::Base
-  after_initialize do
-    @icon = optioins.delete(:icon)
-  end
+  option :icon
+  attr_accessor :icon
 
   after_capture do
     unless @icon.nil?
@@ -214,6 +224,24 @@ Sets html class prefix. It can be `Symbol` or `String` and converted to `String`
 
 Once this method called from class, this class will ommit any text content, captured from template. For example, `<%= element do %><p>Any content</p><% end %>` normally will produce `<div><p>Any content</p></div>`. In some cases you whant to drop `<p>Any content</p>`, for exmaple, inside tables.
 
+#### argument(name, first_only: false, after_options: false, **opts, &block)
+
+Desclares argument for capturing on initialization process.
+
+Inside initialization process, all arguments (except options hash), passed to constructor will be inspected to satisfy conditions, specified in `:if` and `:and` options. If this happens, and block given, it evaluated in context of component instance. If no block given, setter with `name` will be attempted to set value. In any way if conditions satisfied, argument removed from future processing.
+
+If no conditions specified, the `name` of attribute taked as only condition.
+
+#### option(name, after: nil, **opts, &block)
+
+Desclares option for capturing on initialization process.
+
+Provides same manner as `argument` but for hash of options, passed to constructor. Specified conditions are applied to options keys, not to values.
+
+> Hint: you can specify argument and options with same name to call
+> same setter.
+
+
 #### switch(name, options = {}, &block)
 
 Adds `switch`. Switch is a boolean flag. When element created, creation arguments will be scanned for `Symbol`, that equals to `name`. If it founded, switch turned on. Also creation options inspected. If its contains `name: true` key-value pair, this pair removed from options and switch also turned on. `name` can be `Symbol` or `String` and it converted to `Symbol`.
@@ -246,7 +274,7 @@ Adds one ore more sections to element. Refer to [Sections explained](https://git
 
 #### place(src, dst)
 
-Places section `src` to destination, specified in `dst` hash. `dst` is a single key-value Hash. Key can be `:before` and `:after`. Value can be `:begin`, `:end` or any section name. Refer to [Sections explained](https://github.com/cybernetlab/wrap_it/blob/master/sections_explained.md) article for description.
+Places section `src` to destination, specified in `dst` hash. `dst` is a single key-value Hash. Key can be `:before` and `:after`. Value can be `:begin`, `:end` or any section name.
 
 #### sections
 
@@ -278,15 +306,11 @@ Returns array of html classes
 
 Sets html class(es) for element. Arguments can be `String`, `Symbol` or `Array` of it. All converted to plain array of `Symbols`. Duplicated classes removed.
 
-#### add_html_class(*args)
+#### html_class << *args
 
-Adds html class. For args see `#html_class=`
+You can add html classes as into array
 
-#### remove_html_class(*args)
-
-Removes html class. For args see `#html_class=`
-
-#### html_class?(*args, &block)
+#### html_class.include?(*args, &block)
 
 Determines whether element contains class, satisfied by conditions, specified in method arguments.
 
@@ -301,67 +325,44 @@ In second form all arguments are ignored and for each comparison given block cal
 ```ruby
 # with `Symbol` or `String` conditions
 element.html_class = [:a, :b, :c]
-element.html_class?(:a)       #=> true
-element.html_class?(:d)       #=> false
-element.html_class?(:a, 'b')  #=> true
-element.html_class?(:a, :d)   #=> false
+element.html_class.include?(:a)       #=> true
+element.html_class.include?(:d)       #=> false
+element.html_class.include?(:a, 'b')  #=> true
+element.html_class.include?(:a, :d)   #=> false
 
 # with `Regexp` conditions
 element.html_class = [:some, :test]
-element.html_class?(/some/)         #=> true
-element.html_class?(/some/, /bad/)  #=> false
-element.html_class?(/some/, :test)  #=> true
+element.html_class.include?(/some/)         #=> true
+element.html_class.include?(/some/, /bad/)  #=> false
+element.html_class.include?(/some/, :test)  #=> true
 
 # with `Array` conditions
 element.html_class = [:a, :b, :c]
-element.html_class?(%w(a d)) #=> true
-element.html_class?(%w(e d)) #=> false
+element.html_class.include?(%w(a d)) #=> true
+element.html_class.include?(%w(e d)) #=> false
 
 # with block
 element.html_class = [:a, :b, :c]
-element.html_class? { |x| x == 'a' } #=> true
+element.html_class.include? { |x| x == 'a' } #=> true
 ```
 
-#### no_html_class?(*args, &block)
 
-Determines whether element doesn't contains class, satisfied by conditions, specified in method arguments. See `html_class?`.
-
-#### set_html_data(name, value)
-
-Sets HTML data attribute named `name` to `value`.
-
-#### remove_html_data(name)
-
-Removes HTML data attribute named `name`.
-
-## WrapIt::Container
-
-This class used for elements, that can hold other elements.
-
-At first, note, that children can be created by two ways. First - inside template and second - from code. If child created from template, you have two choises again: first to keep child in place, where it defined in template, second - to cut it from there and place together with other childs. Two variables affects on this process: `ommit_content`, defined in `WrapIt::Base` and `extarct_children`. If `ommit_content` is `true`, all content will be dropped and children placed inside `children` section. If `extract_children` is true, children also placed into `children` section, but `content` is keeped.
-
-At second, you have two choises of moment, when children rendered. If `deffered_render` set to `false`, that is as default, all children will be rendered immideately after creation, so you can't change any of them later. If you plan to render your container after children, you chould set it to `true`, so childrens are collected in buffer and will be rendered with parent.
-
-All children, added to container injected with `render_to` and `parent` methods, that are gives you rendering section name and container itself.
-
-### DSL methods
-
-#### child(name, *args, &block)
-
-Creates your own DSL method to create child items. In arguments, you should specify name of method. Then you can specify class name or class itself for child. If ommited, `WrapIt::Base` will be used. All other arguments will be mixed with arguments, specified by user and passed to child constructor. **Warning!** Make shure, that your child arguments don't begins with `String` if you ommit class argument. As workaround, don't ommit class argument and specify it as 'WrapIt::Base'. At last, you can define block, that will be called after creating child, but before its rendering. This child passed as argument to block.
-
-You can render children to section, other than `:children`. To do this, specify `section` option with section name.
-
-Look into [lib/bootstrap_it/view_helpers](https://github.com/cybernetlab/bootstrap_it/tree/master/lib/bootstrap_it/view_helpers) folder for usage examples.
+Look to [Reference documentation]() for other classes description.
 
 # Todo
 
 * Enlarge library functionality
-* Strong testing
 * Finish Sinatra integration
-* Rubydoc documentation
 
 # Changes
+
+`1.0.0`
+* first release version
+* a lot of code refactored
+* documentation allmost finished
+* well test coverage
+* API changed
+* added: arguments and options processing
 
 `0.2.0`
 * added: sections mechanism

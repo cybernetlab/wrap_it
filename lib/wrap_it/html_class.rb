@@ -1,233 +1,214 @@
+require 'delegate'
+
 module WrapIt
   #
-  # Methods for manipulationg with HTML class. For internal usage.
-  # You should not include this class directly - subclass from
-  # `WrapIt::Base` instead.
+  # Provides array-like access to HTML classes.
+  #
+  # This class delegate allmost all methods to underlying array with some
+  # value checking and modification. Also it restrict a list of methods,
+  # exposed below becouse call to theese methods unusefull in context of HTML
+  # class list.
+  #
+  # Some methods, thats described in this document have different manner.
+  # See each method description for details.
+  #
+  # All other methods can be used as with standard array
+  #
+  # Restricted methods: assoc, bsearch, combination, compact, compact!, fill,
+  # flatten, flatten!, insert, pack, permutation, product, rassoc,
+  # repeated_combination, rotate, repeated_permutation, reverse reverse!,
+  # reverse_each, sample, rotate!, shuffle, shuffle!, sort, sort!, sort_by!,
+  # transpose, uniq, uniq!, zip, flat_map, max, max_by, min, min_by, minmax,
+  # minmax_by
   #
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
-  module HTMLClass
-    extend DerivedAttributes
-
-    def self.included(base)
-      base == Base || fail(
-        TypeError,
-        "#{self.class.name} can be included only into WrapIt::Base"
-      )
-      base.extend ClassMethods
-    end
-
+  class HTMLClass < DelegateClass(Array)
     #
-    # Sanitize HTML class list. Arguments list flatten and filtered for only
-    # Strings and Symbols. Duplicates are removed.
+    # Sanitizes and normalizes HTML class. Makes array of classes flatten,
+    # removes all duplicates, splits spaced strings.
     #
-    # @override sanitize([html_class, ...])
-    # @param  html_class [Object] HTML class
+    # @param  values [Object] can be a symbol, string, array of symbols and
+    #   strings, array of strings, strings can contains spaces.
     #
-    # @return [Array<String>] sanitized HTML classes list
-    def self.sanitize(*args)
-      args
+    # @return [Array<String>] sanitized list of HTML classes
+    def self.sanitize(*values)
+      values
         .flatten
-        .map { |a| a.is_a?(String) || a.is_a?(Symbol) ? a.to_s : nil }
-        .compact
+        .each_with_object([]) do |i, a|
+          a << i.to_s if i.is_a?(String) || i.is_a?(Symbol)
+        end
+        .join(' ')
+        .strip
+        .split(/\s+/)
         .uniq
     end
 
-    #
-    # html class getter.
-    #
-    # @return [Array<String>] array of html classes of element.
-    def html_class
-      @options[:class]
+    def initialize(value = [])
+      super(HTMLClass.sanitize(value))
     end
 
-    #
-    # HTML class prefix getter.
-    #
-    # @return [String] HTML class prefix.
-    def html_class_prefix
-      @html_class_prefix ||= self.class.html_class_prefix
+    # Array overrides
+
+    # with array argument and new array return
+    %i(& + - concat |).each do |method|
+      define_method method do |values|
+        HTMLClass.new(__getobj__.send(method, HTMLClass.sanitize(values)))
+      end
     end
 
-    #
-    # Sets html class(es) for element.
-    # @param  value [Symbol, String, Array<Symbol, String>] HTML class or list
-    #   of classes. All classes will be converted to Strings, duplicates are
-    #   removed.
-    # @return [void]
-    #
-    # @example
-    #   element.html_class = [:a, 'b', ['c', :d, 'a']]
-    #   element.html_class #=> ['a', 'b', 'c', 'd']
-    def html_class=(value)
-      @options[:class] = []
-      add_html_class(value)
+    # array process, returning new array
+    %i(collect drop_while map reject select).each do |method|
+      define_method method do |&block|
+        result = __getobj__.send(method, &block)
+        result.is_a?(Array) ? HTMLClass.new(result) : result
+      end
     end
 
+    # bang! array process
+    %i(collect! map! reject!).each do |method|
+      define_method method do |&block|
+        obj = __getobj__
+        result = obj.send(method, &block)
+        obj.replace(HTMLClass.sanitize(obj))
+        result.is_a?(Array) ? self : result
+      end
+    end
+
+    # non-bang array process, returning self
+    %i(each each_index keep_if select!).each do |method|
+      define_method method do |&block|
+        result = __getobj__.send(method, &block)
+        result.is_a?(Array) ? self : result
+      end
+    end
+
+    %i(<< concat).each do |method|
+      define_method method do |values|
+        data = __getobj__ + HTMLClass.sanitize(values)
+        __setobj__(data.uniq)
+        self
+      end
+    end
+
+    # with any args, returning some obj or new array
+    %i([] drop first last pop shift slice! values_at).each do |method|
+      define_method method do |*args|
+        result = __getobj__.send(method, *args)
+        result.is_a?(Array) ? HTMLClass.new(result) : result
+      end
+    end
+    alias_method :slice, :[]
+
+    # @private
+    def clear
+      __getobj__.clear
+      self
+    end
+
+
     #
-    # Adds html class(es) to element. Chaining allowed. All classes will be
-    # converted to Strings, duplicates are removed.
-    # @override add_html_class([[html_class], ...])
-    # @param  html_class [Symbol, String, Array<Symbol, String>]
-    #   HTML class or list of HTML classes.
+    # Removes elements from list by some conditions.
+    #
+    # See {#index} for condition details
+    #
+    # @overload  delete([cond, ...], &block)
+    #   @param  cond [Symbol, String, Array<String>, Regexp] [description]
+    #   @param  &block [Proc] searching block
+    #
     # @return [self]
-    #
-    # @example
-    #   element.html_class = 'a'
-    #   element.add_html_class :b, :c, ['d', :c, :e, 'a']
-    #   element.html_class #=> ['a', 'b', 'c', 'd', 'e']
-    def add_html_class(*args)
-      if @options.key?(:class)
-        @options[:class].is_a?(Array) || options[:class] = [options[:class]]
-        args += @options[:class]
+    def delete(*args, &block)
+      obj = __getobj__
+      args.each do |x|
+        i = index(x)
+        next if i.nil? || i.is_a?(Enumerator)
+        obj.delete_at(i)
       end
-      @options[:class] = HTMLClass.sanitize(*args)
-      self # allow chaining
-    end
-
-    #
-    # Removes html class(es) from element. Chaining allowed.
-    # @override add_html_class([[html_class], ...])
-    # @param html_class [Symbol, String, Regexp, Array<Symbol, String, Regexp>]
-    #   HTML class or list of HTML classes.
-    # @return [self]
-    #
-    # @example
-    #   element.add_html_class %w(a b c d e)
-    #   element.remove_html_class :b, ['c', :e]
-    #   element.html_class #=> ['a', 'd']
-    def remove_html_class(*args)
-      args.flatten!
-      re = []
-      args.reject! { |c| c.is_a?(Regexp) && re << c && true }
-      args = args.uniq.map { |c| c.to_s }
-      args.size > 0 && @options[:class].reject! { |c| args.include?(c) }
-      re.is_a?(Array) && re.each do |r|
-        @options[:class].reject! { |c| r.match(c) }
+      unless block.nil?
+        i = index(&block)
+        i.nil? || obj.delete_at(i)
       end
-      self # allow chaining
+      self
     end
 
     #
-    # Determines whether element contains class, satisfied by conditions,
-    # specified in method arguments.
+    # Searches HTML classes by conditions
     #
-    # There are two forms of method call: with list of conditions as arguments
-    # and with block for comparing. Method makes comparison with html class
-    # untill first `true` return value or end of list. All conditions should
-    # be satisfied for `true` return of this method.
+    # Conditions can be a Symbol, String, Array of strings or Regexp. Or you
+    # can provide block for searching.
     #
-    # In first form, each argument treated as condition. Condition can be a
-    # `Regexp`, so html classes of element tested for matching to that
-    # regular expression. If condition is an `Array` then every class will be
-    # tested for presence in this array. If condition is `Symbol` or `String`
-    # classes will be compared with it via equality operator `==`.
+    # For Strings and Symbols array-like search used (symbols converted to
+    # strings). For Array conditions, any value from this array will match.
+    # For Regexp - regular expression matcher will used.
     #
-    # In second form all arguments are ignored and for each comparison given
-    # block called with html class as argument. Block return value then used.
+    # @param  value [nil, Symbol, String, Array<String>, Regexp] condition
+    # @param  block [Proc] searching block
     #
-    # @overload html_class([condition, ...])
-    # @param condition [<Regexp, Symbol, String, Array<String>]
-    #   condition for comparison.
-    #
-    # @overload html_class(&block)
-    # @yield [html_class] Gives each html class to block. You should return
-    #   `true` if element contains this html class.
-    # @yieldparam html_class [String] html class to inspect.
-    # @yieldreturn [Boolean] whether element has html class.
-    #
-    # @return [Boolean] whether element has class with specified conditions.
-    #
-    # @example with `Symbol` or `String` conditions
-    #   element.html_class = [:a, :b, :c]
-    #   element.html_class?(:a)       #=> true
-    #   element.html_class?(:d)       #=> false
-    #   element.html_class?(:a, 'b')  #=> true
-    #   element.html_class?(:a, :d)   #=> false
-    #
-    # @example with `Regexp` conditions
-    #   element.html_class = [:some, :test]
-    #   element.html_class?(/some/)         #=> true
-    #   element.html_class?(/some/, /bad/)  #=> false
-    #   element.html_class?(/some/, :test)  #=> true
-    #
-    # @example with `Array` conditions
-    #   element.html_class = [:a, :b, :c]
-    #   element.html_class?(%w(a d)) #=> true
-    #   element.html_class?(%w(e d)) #=> false
-    #
-    # @example with block
-    #   element.html_class = [:a, :b, :c]
-    #   element.html_class? { |x| x == 'a' } #=> true
-    def html_class?(*args, &block)
-      args.all? { |c| inspect_class(:any?, c, &block) }
+    # @return [nil, Number] index of finded item or nil
+    def index(value = nil, &block)
+      value.is_a?(Symbol) && value = value.to_s
+      value.is_a?(Array) && value.map! { |x| x.to_s }
+      case
+      when value.is_a?(Regexp) then __getobj__.index { |x| value =~ x }
+      when value.is_a?(Array) then __getobj__.index { |x| value.include?(x) }
+      when block_given? then __getobj__.index(&block)
+      when value.nil? then __getobj__.index
+      else __getobj__.index(value)
+      end
     end
+    alias_method :rindex, :index
 
     #
-    # Determines whether element doesn't contains class, satisfied by
-    # conditions, specified in method arguments.
+    # Determines whether HTML classes have class, matching conditions
     #
-    # @see html_class?
-    def no_html_class?(*args, &block)
-      args.all? { |c| inspect_class(:none?, c, &block) }
-    end
-
-    protected
-
-    def add_default_classes
-      add_html_class(self.class.collect_derived(:@html_class))
-    end
-
-    private
-
-    def inspect_class(with, value = nil, &block)
-      if block_given?
-        @options[:class].send(with, &block)
-      else
-        case
-        when value.is_a?(Regexp)
-          @options[:class].send(with) { |c| value.match(c) }
-        when value.is_a?(String) || value.is_a?(Symbol)
-          @options[:class].send(with) { |c| value.to_s == c }
-        when value.is_a?(Array)
-          @options[:class].send(with) { |c| value.include?(c) }
-        else
-          false
-        end
+    # @overload  include?([cond, ...])
+    #   @param  cond [Symbol, String, Array<String>, Regexp] [description]
+    #
+    # @return [Boolean] whether HTML classes include specified class
+    def include?(*args)
+      args.all? do |x|
+        x.is_a?(Proc) ? !index(&x).nil? : !index(x).nil?
       end
     end
 
     #
-    # Class methods to include
+    # Combines all classes, ready to insert in HTML.
     #
-    module ClassMethods
-      #
-      # @dsl
-      # Adds default html classes, thats are automatically added when element
-      # created.
-      # @override html_class([html_class, ...])
-      # @param  html_class [String, Symbol, Array<String, Symbol>] HTML class.
-      #   Converted to `String`
-      #
-      # @return [void]
-      def html_class(*args)
-        @html_class.nil? || args += @html_class
-        @html_class = HTMLClass.sanitize(*args)
-      end
+    # Actually just join all values with spaces
+    #
+    # @return [String] html string
+    def to_html
+      __getobj__.join(' ')
+    end
 
-      #
-      # @dsl
-      # Sets HTML class prefix. It used in switchers and enums
-      # @param  prefix [String] HTML class prefix
-      #
-      # @return [void]
-      def html_class_prefix(prefix = nil)
-        return(get_derived(:@html_class_prefix) || '') if prefix.nil?
-        prefix.is_a?(String) || prefix.is_a?(Symbol) || fail(
-          ArgumentError, 'prefix should be a String or Symbol'
-        )
-        @html_class_prefix = prefix.to_s
+    %i(replace).each do |method|
+      define_method method do |*values|
+        __getobj__.send(method, HTMLClass.sanitize(values))
+        self
       end
     end
+
+    %i(push unshift).each do |method|
+      define_method method do |*values|
+        __getobj__.send(method, *HTMLClass.sanitize(values))
+        __getobj__.uniq!
+        self
+      end
+    end
+
+    # Restricted functions
+    %i(
+      * []= assoc bsearch combination compact compact! fill flatten flatten!
+      insert pack permutation product rassoc repeated_combination rotate
+      repeated_permutation reverse reverse! reverse_each sample rotate! shuffle
+      shuffle! sort sort! sort_by! transpose uniq uniq! zip flat_map max max_by
+      min min_by minmax minmax_by
+    ).each do |method|
+      define_method(method) do
+        raise "Method #{method} is not supported for HTMLClass"
+      end
+    end
+
+    # Enumerable overrides
   end
 end

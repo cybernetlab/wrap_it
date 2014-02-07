@@ -1,118 +1,307 @@
 require 'spec_helper'
 
 describe WrapIt::HTMLClass do
-  it_behaves_like 'Base module'
+  describe 'self.sanitize' do
+    it { expect(described_class.sanitize).to match_array [] }
 
-  it 'has self.html_class and #html_class methods' do
-    wrapper_class.class_eval { html_class :a, [:b, 'c'] }
-    expect(wrapper.html_class).to eq %w(a b c)
-    sub_class = Class.new(wrapper_class) { html_class :a, [:d, 'e'] }
-    expect(sub_class.new(template_wrapper).html_class).to eq %w(a d e b c)
+    it { expect(described_class.sanitize('test')).to match_array %w(test) }
+
+    it 'removes all except strings and symbols' do
+      expect(described_class.sanitize(0, :some, true, nil, Object, 'test'))
+        .to match_array %w(some test)
+    end
+
+    it 'removes repeated classes' do
+      expect(described_class.sanitize('a', :a, 'b')).to match_array %w(a b)
+    end
+
+    it 'flats recursive arrays' do
+      expect(described_class.sanitize(:a, [:b, [:c, :d, :a]]))
+        .to match_array %w(a b c d)
+    end
+
+    it 'removes repeated and trailing spaces' do
+      expect(described_class.sanitize("  some \n\ttest", 'class array  '))
+        .to match_array %w(some test class array)
+    end
   end
 
-  describe '#html_class_prefix' do
-    it 'returns empty string by default' do
-      expect(wrapper.html_class_prefix).to eq ''
-    end
+  it 'overrides #&' do
+    subject << 'a b c'
+    expect(subject & %w(b d c)).to match_array %w(b c)
+    expect(subject & 'b').to match_array %w(b)
+    expect(subject & %w(b)).to be_kind_of described_class
+  end
 
-    it 'returns value setted by class method' do
-      wrapper_class.class_eval { html_class_prefix 'e-' }
-      expect(wrapper.html_class_prefix).to eq 'e-'
-    end
+  it 'overrides #<<' do
+    expect(subject << 'a').to equal subject
+    expect(subject << [0, 1, :b]).to match_array %w(a b)
+    expect(subject << 'c').to match_array %w(a b c)
+  end
 
-    it 'returns derived value' do
-      wrapper_class.class_eval { html_class_prefix 'e-' }
-      sub_class = Class.new(wrapper_class)
-      expect(sub_class.new(template_wrapper).html_class_prefix).to eq 'e-'
+  it 'overrides #+' do
+    subject << 'a b c'
+    expect(subject + %w(b d c)).to match_array %w(a b c d)
+    expect(subject + 'b').to match_array %w(a b c)
+    expect(subject + %w(b)).to be_kind_of described_class
+  end
+
+  it 'overrides #-' do
+    subject << 'a b c d'
+    expect(subject - %w(b c j)).to match_array %w(a d)
+    expect(subject - 'd').to match_array %w(a b c)
+    expect(subject - %w(b)).to be_kind_of described_class
+  end
+
+  it 'overrides #[] and #slice' do
+    subject << 'a b c'
+    %i([] slice).each do |m|
+      expect(subject.send(m, 1)).to eq 'b'
+      expect(subject.send(m, 0, 2)).to match_array %w(a b)
+      expect(subject.send(m, 0, 2)).to be_kind_of described_class
+      expect(subject.send(m, 1..-1)).to match_array %w(b c)
+      expect(subject.send(m, 1..-1)).to be_kind_of described_class
     end
   end
 
-  it 'has #add_html_class with chaining' do
-    expect(wrapper.add_html_class(:test).options[:class]).to eq %w(test)
-    @wrapper = nil
-    expect(wrapper.add_html_class(:a, 'b').options[:class]).to eq %w(a b)
-    @wrapper = nil
-    expect(
-      wrapper.add_html_class(:a, [:b, :c]).options[:class]
-    ).to eq %w(a b c)
+  it 'overrides #slice!' do
+    subject = WrapIt::HTMLClass.new('a b c')
+    expect(subject.slice!(1)).to eq 'b'
+    expect(subject).to match_array %w(a c)
+    subject = WrapIt::HTMLClass.new('a b c')
+    expect(subject.slice!(0, 2)).to match_array %w(a b)
+    expect(subject).to match_array %w(c)
+    subject = WrapIt::HTMLClass.new('a b c')
+    expect(subject.slice!(0, 2)).to be_kind_of described_class
+    subject = WrapIt::HTMLClass.new('a b c')
+    expect(subject.slice!(1..-1)).to match_array %w(b c)
+    expect(subject).to match_array %w(a)
+    subject = WrapIt::HTMLClass.new('a b c')
+    expect(subject.slice!(1..-1)).to be_kind_of described_class
   end
 
-  it 'has #remove_html_class with chaining' do
-    expect(
-      wrapper.add_html_class(:a, :b).remove_html_class('a').options[:class]
-    ).to eq %w(b)
+  it 'overrides #clear' do
+    subject << 'a b c'
+    expect(subject.clear).to equal subject
+    expect(subject).to be_empty
   end
 
-  it 'has #html_class? method' do
-    expect(wrapper.add_html_class(:a1, :b1).html_class?('a1')).to be_true
-    expect(wrapper.html_class?(:a1, :b1)).to be_true
-    expect(wrapper.html_class?(:a1, :b2)).to be_false
-    expect(wrapper.html_class?(:a2)).to be_false
-    expect(wrapper.html_class?(/\d+/)).to be_true
-    expect(wrapper.html_class?(%w(a1 c1))).to be_true
-    expect(wrapper.html_class? { |x| x[0] == 'a' }).to be_true
+  it 'overrides #collect' do
+    subject << 'a b c'
+    expect(subject.collect { |x| x + '1' }).to match_array %w(a1 b1 c1)
+    expect(subject.collect { }).to be_kind_of described_class
+    expect(subject.collect).to be_kind_of Enumerator
   end
 
-  it 'has #no_html_class? method' do
-    expect(wrapper.add_html_class(:a1, :b1).no_html_class?('a2')).to be_true
-    expect(wrapper.no_html_class?(:a2, :b2)).to be_true
-    expect(wrapper.no_html_class?(:a1, :b2)).to be_false
-    expect(wrapper.no_html_class?(:a1)).to be_false
-    expect(wrapper.no_html_class?(/\d+./)).to be_true
-    expect(wrapper.no_html_class?(%w(c1 d1))).to be_true
-    expect(wrapper.no_html_class? { |x| x[0] == 'c' }).to be_true
+  it 'overrides #collect!' do
+    subject << 'a b c'
+    expect(subject.collect! { |x| [x, 'n'] }).to match_array %w(a b c n)
+    expect(subject.collect! { }).to equal subject
+    expect(subject.collect!).to be_kind_of Enumerator
   end
 
-  it 'has html_class setter' do
-    wrapper.html_class = [:a, :b]
-    expect(wrapper.options[:class]).to eq %w(a b)
+  it 'overrides #concat' do
+    subject << 'a b c'
+    expect(subject.concat(%w(b d c))).to match_array %w(a b c d)
+    expect(subject.concat('e')).to match_array %w(a b c d e)
+    expect(subject.concat(%w(b))).to equal subject
   end
 
-  describe 'documentation examples' do
-    let(:element) { wrapper }
+  it 'overrides #delete' do
+    subject << 'a b2 c'
+    expect(subject.delete(:a)).to match_array %w(b2 c)
+    expect(subject.delete('d')).to match_array %w(b2 c)
+    expect(subject.delete('d')).to equal subject
+    expect(subject.delete('d', :b2)).to match_array %w(c)
+    subject << 'a b2'
+    expect(subject.delete(/.\d/, 'c')).to match_array %w(a)
+    expect(subject.delete { |x| x == 'a' }).to be_empty
+  end
 
-    it 'html_class=' do
-      element.html_class = [:a, 'b', ['c', :d, 'a']]
-      expect(element.html_class).to eq %w(a b c d)
+  %i(index rindex).each do |m|
+    it "overrides ##{m}" do
+      subject << 'a b2 c'
+      expect(subject.index(:a)).to eq 0
+      expect(subject.index('d')).to be_nil
+      expect(subject.index(['d', :b2])).to eq 1
+      expect(subject.index(/.\d/)).to eq 1
+      expect(subject.index { |x| x == 'c' }).to eq 2
+      expect(subject.index).to be_kind_of Enumerator
     end
+  end
 
-    it 'add_html_class' do
-      element.html_class = 'a'
-      element.add_html_class :b, :c, ['d', :c, :e, 'a']
-      expect(element.html_class).to include(*%w(a b c d e))
-      expect(element.html_class.size).to eq 5
-    end
+  it 'overrides #drop' do
+    subject << 'a b c'
+    expect(subject.drop(1)).to match_array %w(b c)
+    expect(subject.drop(1)).to be_kind_of described_class
+    expect(subject).to match_array %w(a b c)
+  end
 
-    it 'remove_html_class' do
-      element.add_html_class %w(a b c d e)
-      element.remove_html_class :b, ['c', :e]
-      expect(element.html_class).to eq %w(a d)
+  {drop_while: %w(c d), reject: %w(c), select: %w(a b d)}.each do |m, v|
+    it "overrides ##{m}" do
+      subject << 'a b c d'
+      expect(subject.send(m) { |x| x != 'c' }).to match_array v
+      expect(subject.send(m) { |x| x != 'c' }).to be_kind_of described_class
+      expect(subject.send(m)).to be_kind_of Enumerator
     end
+  end
 
-    it 'html_class? with Symbol or String' do
-      element.html_class = [:a, :b, :c]
-      expect(element.html_class?(:a)).to be_true
-      expect(element.html_class?(:d)).to be_false
-      expect(element.html_class?(:a, 'b')).to be_true
-      expect(element.html_class?(:a, :d)).to be_false
+  {map: %w(ac bc cc dc)}.each do |m, v|
+    it "overrides ##{m}" do
+      subject << 'a b c d'
+      expect(subject.send(m) { |x| x = x + 'c' }).to match_array v
+      expect(subject.send(m) { |x| x = x + 'c' }).to be_kind_of described_class
+      expect(subject.send(m)).to be_kind_of Enumerator
     end
+  end
 
-    it 'html_class? with Regexp' do
-      element.html_class = [:some, :test]
-      expect(element.html_class?(/some/)).to be_true
-      expect(element.html_class?(/some/, /bad/)).to be_false
-      expect(element.html_class?(/some/, :test)).to be_true
-    end
+  it "overrides #map!" do
+    subject << 'a b c d'
+    expect(subject.map! { |x| x = x + 'c' }).to equal subject
+    expect(subject).to match_array %w(ac bc cc dc)
+    expect(subject.map!).to be_kind_of Enumerator
+  end
 
-    it 'html_class? with Array' do
-      element.html_class = [:a, :b, :c]
-      expect(element.html_class?(%w(a d))).to be_true
-      expect(element.html_class?(%w(e d))).to be_false
-    end
+  it "overrides #reject!" do
+    subject << 'a b1 c1 d'
+    expect(subject.reject! { |x| /\d/ =~ x }).to equal subject
+    expect(subject).to match_array %w(a d)
+    expect(subject.reject!).to be_kind_of Enumerator
+  end
 
-    it 'html_class? with block' do
-      element.html_class = [:a, :b, :c]
-      expect(element.html_class? { |x| x == 'a' }).to be_true
+  %i(each each_index).each do |m|
+    it "overrides ##{m}" do
+      subject << 'a b c'
+      i = 0
+      expect(subject.send(m) { |x| i += 1 }).to equal subject
+      expect(i).to eq 3
+      expect(subject.send(m)).to be_kind_of Enumerator
     end
+  end
+
+  {first: %w(a b), last: %w(c b)}.each do |m, v|
+    it "overrides ##{m}" do
+      expect(subject.send(m)).to be_nil
+      subject << 'a b c'
+      expect(subject.send(m)).to eq v[0]
+      expect(subject.send(m, 2)).to match_array v
+      expect(subject.send(m, 2)).to be_kind_of described_class
+    end
+  end
+
+  it "overrides #pop" do
+    expect(subject.pop).to be_nil
+    subject << 'a b c'
+    expect(subject.pop).to eq 'c'
+    expect(subject).to match_array %w(a b)
+    subject << 'c'
+    expect(subject.pop(2)).to match_array %w(b c)
+    expect(subject).to match_array %w(a)
+    subject << 'b c'
+    expect(subject.pop(2)).to be_kind_of described_class
+  end
+
+  it "overrides #shift" do
+    expect(subject.shift).to be_nil
+    subject << 'a b c'
+    expect(subject.shift).to eq 'a'
+    expect(subject).to match_array %w(b c)
+    subject << 'a'
+    expect(subject.shift(2)).to match_array %w(b c)
+    expect(subject).to match_array %w(a)
+    subject << 'b c'
+    expect(subject.shift(2)).to be_kind_of described_class
+  end
+
+  it 'overrides #include?' do
+    subject << 'a b2 c'
+    expect(subject.include?(:a)).to be_true
+    expect(subject.include?('d')).to be_false
+    expect(subject.include?('d', :b2)).to be_false
+    expect(subject.include?('a', :b2)).to be_true
+    expect(subject.include?(/.\d/)).to be_true
+    expect(subject.include?(proc { |x| x == 'c' })).to be_true
+  end
+
+  it 'overrides #replace' do
+    subject << 'a b c'
+    expect(subject.replace('d e f')).to match_array %w(d e f)
+    expect(subject.replace('a b')).to equal subject
+  end
+
+  it 'overrides #keep_if' do
+    subject << 'a b c'
+    expect(subject.keep_if { |x| x != 'c' }).to match_array %w(a b)
+    expect(subject.keep_if { |x| x != 'c' }).to equal subject
+    expect(subject.keep_if).to be_kind_of Enumerator
+  end
+
+  it 'overrides #push' do
+    subject << 'a b c'
+    expect(subject.push('a d')).to equal subject
+    expect(subject).to match_array %w(a b c d)
+  end
+
+  it 'overrides #unshift' do
+    subject << 'a b c'
+    expect(subject.unshift('a d')).to equal subject
+    expect(subject).to match_array %w(a d b c)
+  end
+
+  it 'overrides #values_at' do
+    subject << 'a b c'
+    expect(subject.values_at(0, 2)).to match_array %w(a c)
+    expect(subject.values_at(1)).to be_kind_of described_class
+  end
+
+  it 'overrides #|' do
+    subject << 'a b c'
+    expect(subject | 'b c d').to match_array %w(a b c d)
+    expect(subject | 'b c d').to be_kind_of described_class
+  end
+
+  {
+    :'<=>' => [%w(b c d e)],
+    :== => [%w(b c d e)],
+    at: [1],
+    count: [],
+    count: ['a'],
+    delete_at: [1],
+    fetch: [1],
+    hash: [],
+    inspect: [],
+    to_s: [],
+    join: ['-'],
+    length: [],
+    size: [],
+    take: [2],
+    to_a: [],
+  }.each do |m, args|
+    it "passes through ##{m}" do
+      a = %w(a b c d)
+      subject << a
+      expect(subject.send(m, *args)).to eq a.send(m, *args)
+    end
+  end
+
+  it 'passes through #empty?' do
+    expect(subject.empty?).to be_true
+  end
+
+  it 'resticts unusefull methods' do
+    %i(
+      * []= assoc bsearch combination compact compact! fill flatten flatten!
+      insert pack permutation product rassoc repeated_combination rotate
+      repeated_permutation reverse reverse! reverse_each sample rotate! shuffle
+      shuffle! sort sort! sort_by! transpose uniq uniq! zip flat_map max max_by
+      min min_by minmax minmax_by
+    ).each do |m|
+      expect { subject.send(m) }.to raise_error
+    end
+  end
+
+  it 'provides #to_html' do
+    subject << [:a, :b, :c]
+    expect(subject.to_html).to eq 'a b c'
   end
 end

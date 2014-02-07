@@ -5,47 +5,38 @@ module WrapIt
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   module Enums
+    # Documentation includes
+    # @!parse extend  Enums::ClassMethods
+
+    # module implementation
+
     extend DerivedAttributes
 
+    #
     def self.included(base)
       base == Base || fail(
         TypeError,
         "#{self.class.name} can be included only into WrapIt::Base"
       )
-      base.extend ClassMethods
-      base.after_initialize :enums_init
-    end
+      base.class_eval do
+        extend ClassMethods
 
-    private
+        before_initialize { @enums = {} }
 
-    def enums_init
-      @enums = {}
-      opt_keys = @options.keys
-      enums.each do |name, opts|
-        value = nil
-        names = [name] + [opts[:aliases] || []].flatten
-        opt_keys.select { |o| names.include? o }.each do |key|
-          tmp = @options.delete(key)
-          value ||= tmp
-          !value.nil? && !opts[:values].include?(value) && value = nil
+        before_capture do
+          self.class.collect_derived(:@enums, {}, :merge).each do |name, e|
+            next unless e.key?(:default) && !@enums.key?(name)
+            send("#{name}=", e[:default])
+          end
         end
-        @arguments.extract!(Symbol, and: [opts[:values]]).each do |key|
-          value ||= key
-        end
-        send("#{name}=", value)
       end
     end
 
-    def enums
-      @enums_hash ||= self.class.collect_derived(:@enums, {}, :merge)
-    end
-
     #
-    # Class methods to include
+    # {Enums} class methods
     #
     module ClassMethods
       #
-      # @dsl
       # Adds `enum`. When element created, creation arguments will be scanned
       # for `Symbol`, that included contains in `values`. If it founded, enum
       # takes this value. Also creation options inspected. If its  contains
@@ -60,16 +51,26 @@ module WrapIt
       #
       # This method also adds getter and setter for this enum.
       #
+      # @example
+      #   class Button < WrapIt::Base
+      #     enum :style, %i(red green black), html_class_prefix: 'btn-'
+      #   end
+      #
+      #   btn = Button.new(template, :green)
+      #   btn.render # => '<div class="btn-green">'
+      #   btn = Button.new(template, style: :red)
+      #   btn.render # => '<div class="btn-red">'
+      #
       # @param  name [String, Symbol] Enum name. Converted to `Symbol`.
-      # @param  options [Hash] Enum options
-      # @options options [String, Symbol] :html_class_prefix prefix of HTML
+      # @param  opts [Hash] Enum options
+      # @option opts [String, Symbol] :html_class_prefix prefix of HTML
       #   class that will automatically added to element if enum changes its
       #   value.
-      # @options options [Boolean] :html_class whether this enum changes
+      # @option opts [Boolean] :html_class whether this enum changes
       #   should affect to html class.
-      # @options options [Symbol, Array<Symbol>] :aliases list of enum aliases.
+      # @option opts [Symbol, Array<Symbol>] :aliases list of enum aliases.
       #   Warning! Values are not converted - pass only `Symbols` here.
-      # @options options [String, Symbol] :default default value for enum,
+      # @option opts [String, Symbol] :default default value for enum,
       #   if nil or wrong value given. Converted to `Symbol`.
       # @yield [value] Runs block when enum value changed, gives it to block.
       # @yieldparam value [Symbol] New enum value.
@@ -90,25 +91,34 @@ module WrapIt
           opts[:regexp] = /\A#{prefix}(?:#{values.join('|')})\z/
           opts[:html_class_prefix] = prefix
         end
-        define_method("#{name}") { @enums[name] }
+        define_method("#{name}") { @enums[name] ||= opts[:default] }
         define_method("#{name}=", &Enums.setter(name, &block))
         @enums ||= {}
+
+        o_params = {}
+        if opts.key?(:aliases)
+          aliases = [opts[:aliases]].flatten.compact
+          o_params[:if] = [name] + aliases
+        end
+
         @enums[name] = opts
+        option(name, **o_params) { |_, v| send("#{name}=", v) }
+        argument(name, if: Symbol, and: values) { |_, v| send("#{name}=", v) }
       end
     end
 
     private
 
     def self.setter(name, &block)
-      proc do |value|
-        opts = enums[name]
+      ->(value) do
+        opts = self.class.collect_derived(:@enums, {}, :merge)[name]
         v = value if opts[:values].include?(value)
         v ||= opts[:default] if opts.key?(:default)
         @enums[name] = v
         block.nil? || instance_exec(v, &block)
         if opts.key?(:regexp)
-          remove_html_class(opts[:regexp])
-          v.nil? || add_html_class("#{opts[:html_class_prefix]}#{v}")
+          html_class.delete(opts[:regexp])
+          v.nil? || html_class << "#{opts[:html_class_prefix]}#{v}"
         end
       end
     end

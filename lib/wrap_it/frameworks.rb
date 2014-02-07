@@ -1,7 +1,9 @@
-#
-# Framework detection methods
-#
 module WrapIt
+  #
+  # Framework detection methods
+  #
+
+  # @private
   def self.framework
     return @framework unless @framework.nil?
     gems = Gem.loaded_specs.keys
@@ -14,10 +16,12 @@ module WrapIt
     end
   end
 
+  # @private
   def self.rails?
     framework == :rails
   end
 
+  # @private
   def self.sinatra?
     framework == :sinatra
   end

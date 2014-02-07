@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe WrapIt::Enums do
+describe WrapIt::Enums, type: :wrapped do
   it_behaves_like 'Base module'
 
   context 'wrapper have `kind` enum' do
@@ -26,7 +26,6 @@ describe WrapIt::Enums do
       expect(wrapper(kind: :black).kind).to eq :black
       @wrapper = nil
       expect(wrapper(kind: false).kind).to be_nil
-      expect(wrapper.options).to_not include :kind
     end
 
     it 'runs block' do
@@ -83,7 +82,7 @@ describe WrapIt::Enums do
       @wrapper = nil
       expect(wrapper(kind: :no).kind).to eq :white
       @wrapper = nil
-      expect(wrapper(:black, kind: :no).kind).to eq :black
+      expect(wrapper(:black, kind: :no).kind).to eq :white
     end
   end
 end

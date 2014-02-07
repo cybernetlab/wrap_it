@@ -1,21 +1,27 @@
 require 'spec_helper'
 
 describe WrapIt::HTMLData do
-  it_behaves_like 'Base module'
+  describe 'self.sanitize' do
+    it { expect(described_class.sanitize).to eq ({}) }
 
-  describe '#set_html_data' do
-    it 'sets data' do
-      wrapper.set_html_data(:one, 'test')
-      expect(wrapper.options[:data]).to eq(one: 'test')
+    it 'stringifies values' do
+      expect(described_class.sanitize(test: 1, subj: 2))
+        .to eq(test: '1', subj: '2')
     end
-  end
 
-  describe '#remove_html_data' do
-    it 'removes data' do
-      wrapper.set_html_data(:one, 'test')
-      wrapper.remove_html_data(:one)
-      expect(wrapper.options[:data]).to be_empty
+    it 'splits dashed keys' do
+      expect(described_class.sanitize(:'test-me-now' => 1, subj: 2))
+        .to eq(test: {me: {now: '1'}}, subj: '2')
+    end
+
+    it 'parses nested hash' do
+      expect(described_class.sanitize(test: {:'me-now' => 1}, subj: 2))
+        .to eq(test: {me: {now: '1'}}, subj: '2')
+    end
+
+    it 'removes bogous symbols from keys' do
+      expect(described_class.sanitize(test: {:'me_n%ow' => 1}, subj: 2))
+        .to eq(test: {me_now: '1'}, subj: '2')
     end
   end
 end
-

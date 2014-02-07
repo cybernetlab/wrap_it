@@ -4,7 +4,8 @@ module WrapIt
   #
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
-  # TODO: single_child
+  # @todo  single_child realization
+  # @todo  refactor code for more clearness
   class Container < Base
     switch :deffered_render do |_|
       # avoid changing deffered_render after any child added
@@ -15,27 +16,64 @@ module WrapIt
       end
     end
 
+    # list of children elements
     attr_reader :children
+
+    # children can be extracted from normal template flow and rendered in
+    # separate section.
     attr_writer :extract_children
+
     section :children
 
     def extract_children?
       @extract_children == true
     end
 
-    after_initialize do
+    before_initialize do
       @children = []
-      self.class.extract_from_options.each do |option, name|
-        args = options.delete(option)
-        next if args.nil?
-        args = [args] unless args.is_a?(Array)
-        self.deffered_render = true
-        send(name, *args)
-      end
     end
 
     #
-    # Defines child elements helper for creation of child items.
+    # Defines helper for child elements creation.
+    #
+    # @example  simple usage
+    #   class Item < WrapIt::Base
+    #     include TextContainer
+    #   end
+    #
+    #   class List < WrapIt::Container
+    #     default_tag 'ul'
+    #     child :item, tag: 'li'
+    #   end
+    #
+    #   list = List.new(template)
+    #   list.item 'list item 1'
+    #   list.item 'list item 2'
+    #   list.render # => '<ul><li>list item 1'</li><li>list item 2</li></ul>'
+    #
+    # @example  with option
+    #   class Button < WrapIt::Container
+    #     include TextContainer
+    #     html_class 'btn'
+    #     child :icon, tag: 'i', option: true
+    #   end
+    #
+    #   btn = Button.new(template, 'Home', icon: { class: 'i-home' })
+    #   btn.render # => '<div class="btn">Home<i class="i-home"></i></div>'
+    #
+    # @overload child(name, class_name = nil, [args, ...], opts = {}, &block)
+    #   @param name [Symbol, String] helper method name
+    #   @param class_name [String, Base] class for child elements. If ommited
+    #     WrapIt::Base will be used
+    #   @param args [Object] any arguments that will be passed to child
+    #     element constructor
+    #   @param opts [Hash] options
+    #   @option opts [true, Symbol] :option if specified, child can be created
+    #     via option with same name (if :option is true) or with specified
+    #     name
+    #   @option opts [Symbol] :section section to that this children will be
+    #     rendered. By default children rendered to `children`. Refer to
+    #     {Sections} module for details.
     #
     # @return [String]
     def self.child(name, *args, &block)
@@ -48,8 +86,11 @@ module WrapIt
           'WrapIt::Base'
         end
       child_class = child_class.name if child_class.is_a?(Class)
-      @helpers ||= []
-      @helpers << name
+
+      opts = args.extract_options!
+      extract = opts.delete(:option)
+      args << opts
+
       define_method name do |*helper_args, &helper_block|
         # We should clone arguments becouse if we have loop in template,
         # `extract_options!` below works only for first iterration
@@ -60,20 +101,21 @@ module WrapIt
         helper_args += default_args + [options]
         add_children(name, child_class, block, *helper_args, &helper_block)
       end
-    end
 
-    def self.extract_from_options(*args)
-      return @extract_from_options || [] if args.size == 0
-      hash = args.extract_options!
-      args.size.odd? && fail(ArgumentError, 'odd arguments number')
-      args.each_with_index { |arg, i| i.even? && hash[arg] = args[i + 1] }
-      @helpers ||= []
-      hash.symbolize_keys!
-      @extract_from_options = Hash[
-        hash.select do |k, v|
-          (v.is_a?(String) || v.is_a?(Symbol)) && @helpers.include?(k)
-        end.map { |k, v| [k, v.to_sym] }
-      ]
+      unless extract.nil?
+        extract.is_a?(Array) || extract = [extract]
+        extract.each do |opt_name|
+          opt_name = name if opt_name == true
+          option(opt_name) do |_, arguments|
+            self.deffered_render = true
+            arguments.is_a?(Array) || arguments = [arguments]
+            o = arguments.extract_options!
+            o.merge!(extracted: true)
+            arguments << o
+            send name, *arguments
+          end
+        end
+      end
     end
 
     after_capture do
@@ -106,6 +148,7 @@ module WrapIt
     def add_children(name, helper_class, class_block, *args, &helper_block)
       options = args.extract_options!
       section = options.delete(:section) || :children
+      extracted = options.delete(:extracted) == true
       args << options
       item = Object
         .const_get(helper_class)
@@ -120,6 +163,7 @@ module WrapIt
       class_block.nil? || instance_exec(item, &class_block)
 
       deffered_render? && @children << item
+      return if extracted
       if !deffered_render? && (omit_content? || extract_children?)
         self[section] << capture { item.render }
       end

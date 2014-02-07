@@ -8,25 +8,26 @@ describe WrapIt::Base do
           section :append, :prepend
           place :prepend, before: :content
           place :append, after: :content
-          after_initialize do
-            @prepend = options.delete(:prepend)
-            @append = options.delete(:append)
+
+          option :prepend do |_, value|
+            self[:prepend] = content_tag('span', value,
+                                         class: 'input-group-addon')
           end
+
+          option :append do |_, value|
+            self[:append] = content_tag('span', value,
+                                        class: 'input-group-addon')
+          end
+
           after_capture do
-            unless @prepend.nil?
-              self[:prepend] = content_tag('span', @prepend,
-                                           class: 'input-group-addon')
-            end
-            unless @append.nil?
-              self[:append] = content_tag('span', @append,
-                                          class: 'input-group-addon')
-            end
             if self[:content].empty?
-              options[:type] = 'text'
-              add_html_class 'form-control'
+              html_attr[:type] = 'text'
+              html_class << 'form-control'
+              options = html_attr
+                .merge(class: html_class.to_html)
+                .merge(html_data)
               self[:content] = content_tag('input', '', options)
-              options.clear
-              add_html_class 'input-group'
+              self.html_class = 'input-group'
             end
           end
         end

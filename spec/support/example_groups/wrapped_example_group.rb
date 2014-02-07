@@ -3,9 +3,9 @@
 #
 # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
 #
-module WrapItExampleGroup
-  BASE_MODULES = [WrapIt::HTMLClass, WrapIt::HTMLData, WrapIt::Switches,
-                  WrapIt::Enums, WrapIt::Renderer, WrapIt::Sections]
+module WrappedExampleGroup
+  BASE_MODULES = [WrapIt::HTML, WrapIt::Switches, WrapIt::Enums,
+                  WrapIt::Renderer, WrapIt::Sections, WrapIt::Arguments]
 
   def self.included(base)
     base.instance_eval do
@@ -44,8 +44,8 @@ module WrapItExampleGroup
   RSpec.configure do |config|
     config.include(
       self,
-      type: :wrap_it,
-      example_group: { file_path: /spec/ }
+      type: :wrapped,
+      example_group: { file_path: /spec\/(wrapped|integration)/ }
     )
   end
 end
