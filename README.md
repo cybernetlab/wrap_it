@@ -358,6 +358,9 @@ Look to [Reference documentation](http://rubydoc.info/github/cybernetlab/wrap_it
 
 # Changes
 
+`1.0.2`
+* profiling in real application and some performance improvements
+
 `1.0.1`
 * refactor some code to remove complexity
 * code now tested with [travis](https://travis-ci.org/cybernetlab/wrap_it)

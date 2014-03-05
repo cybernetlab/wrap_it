@@ -19,6 +19,10 @@ module WrapIt
     # {DerivedAttributes} class methods
     #
     module ClassMethods
+      def parents
+        @parents ||= ancestors.take_while { |a| a != Base }.concat([Base])
+      end
+
       #
       # retrieves first founded derived variable or nil
       # @param  name [Symbol] variable name (should contain `@` sign)
@@ -42,12 +46,10 @@ module WrapIt
       #   founded variable with collection
       #
       # @return [Object] collection of variables
-      def collect_derived(name, initial = [], method = :concat)
-        result = initial
-        ancestors.each do |ancestor|
-          next unless ancestor.instance_variable_defined?(name)
-          result = result.send(method, ancestor.instance_variable_get(name))
-          break if ancestor == Base
+      def collect_derived(name, result = [], method = :concat)
+        parents.select { |p| p.instance_variable_defined?(name) }
+               .each do |p|
+          result = result.send(method, p.instance_variable_get(name))
         end
         result
       end

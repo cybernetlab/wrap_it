@@ -200,13 +200,8 @@ module WrapIt
       def capture_arguments!(args, inherited = true, instance = nil, &block)
         opts = args.extract_options!
         if inherited
-          ancestors.take_while { |a| a != Arguments.base }
-                   .reverse
-                   .unshift(Arguments.base)
-                   .map do |a|
-            next unless a.methods.include?(:extract_for_class)
-            a.extract_for_class(args, opts, instance, &block)
-          end
+          arg_parents.select { |a| a.protected_methods.include?(:extract_for_class) }
+                     .each { |a| a.extract_for_class(args, opts, instance, &block) }
           result_args = collect_derived(:@provided_arguments, {}, :merge)
                         .values
                         .flatten
@@ -226,6 +221,12 @@ module WrapIt
       end
 
       protected
+
+      def arg_parents
+        @arg_parents ||= ancestors.take_while { |a| a != Arguments.base }
+                                  .reverse
+                                  .unshift(Arguments.base)
+      end
 
       attr_reader :provided_options, :provided_arguments, :provided_block
 

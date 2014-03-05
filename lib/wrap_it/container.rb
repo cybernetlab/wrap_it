@@ -89,6 +89,7 @@ module WrapIt
 
       define_method name do |*hargs, extracted: false, **hopts, &hblock|
         hargs += args
+        # TODO: merge html class correctly. Now it just overrided by opts
         hopts.merge!(opts)
         hopts[:helper_name] = name
         child = prepare_child(child_class, block, *hargs, **hopts, &hblock)
