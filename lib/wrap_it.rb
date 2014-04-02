@@ -1,3 +1,13 @@
+if RUBY_VERSION >= '2.1.0'
+  require 'ensure_it_refined'
+else
+  require 'ensure_it'
+end
+
+EnsureIt.configure do |config|
+  config.error_class = ArgumentError
+end
+
 require File.join %w(wrap_it frameworks)
 
 if WrapIt.rails?

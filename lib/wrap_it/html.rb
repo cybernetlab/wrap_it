@@ -120,6 +120,8 @@ module WrapIt
     # {HTML} class methods
     #
     module ClassMethods
+      using EnsureIt if ENSURE_IT_REFINED
+
       #
       # Adds default html classes, thats are automatically added when element
       # created.
@@ -139,10 +141,7 @@ module WrapIt
       # @return [void]
       def html_class_prefix(prefix = nil)
         return(get_derived(:@html_class_prefix) || '') if prefix.nil?
-        prefix.is_a?(Symbol) && prefix = prefix.to_s
-        prefix.is_a?(String) || fail(ArgumentError,
-                                     'prefix should be a String or Symbol')
-        @html_class_prefix = prefix
+        @html_class_prefix = prefix.ensure_string!
       end
     end
   end

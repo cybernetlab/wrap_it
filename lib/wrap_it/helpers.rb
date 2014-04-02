@@ -49,6 +49,8 @@
 # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
 #
 module WrapIt
+  using EnsureIt if ENSURE_IT_REFINED
+
   #
   # Registers helpers module
   #
@@ -87,19 +89,13 @@ module WrapIt
   def self.register_block(options)
     # Runs in helpers module class context
     proc do |*args|
-      class_name = args.pop
-      class_name.is_a?(String) || class_name.is_a?(Class) || fail(
-        ArgumentError,
-        "Last argument for #{name}.register_helper should be a class name"
-      )
-      class_name.is_a?(Class) && class_name = class_name.name
+      class_name = args.pop.ensure_class!(
+        string: true,
+        message: "Last argument for #{name}.register_helper should be" \
+                 " a class name"
+      ).name
       helpers = instance_methods
-      args.each do |helper|
-        !helper.is_a?(Symbol) && fail(
-          ArgumentError,
-          "First arguments for WrapIt.register" \
-          " should be Symbols with helper names"
-        )
+      args.ensure_array(:ensure_symbol!).each do |helper|
         helpers.include?(helper) && fail(
           ArgumentError, "Helper #{helper} for WrapIt.register allready exists"
         )

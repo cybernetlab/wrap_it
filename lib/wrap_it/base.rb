@@ -19,6 +19,8 @@ module WrapIt
   # @author Alexey Ovchinnikov <alexiss@cybernetlab.ru>
   #
   class Base
+    using EnsureIt if ENSURE_IT_REFINED
+
     # Documentation includes
     #
     # @!parse extend  Arguments::ClassMethods
@@ -57,7 +59,7 @@ module WrapIt
       run_callbacks :initialize do
         capture_arguments!(args, &block)
         # TODO: uncomment following after html_attr implementation finished
-        #html_attr.merge!(args.extract_options!)
+        # html_attr.merge!(args.extract_options!)
         self.html_attr = args.extract_options!
         # TODO: find convenient way to save unprocessed arguments
         @arguments = args
@@ -69,13 +71,13 @@ module WrapIt
     end
 
     def tag=(value)
-      value.is_a?(Symbol) && value = value.to_s
-      value.is_a?(String) && @tag = value
+      value = value.ensure_string
+      @tag = value unless value.nil?
     end
 
     def helper_name=(value)
-      value.is_a?(String) && value = value.to_sym
-      value.is_a?(Symbol) && @helper_name = value
+      value = value.ensure_symbol
+      @helper_name = value unless value.nil?
     end
 
     def omit_content?
@@ -101,7 +103,9 @@ module WrapIt
       capture_sections
 
       # add to content string args and block result if its present
-      args.flatten.each { |a| self[:render_arguments] << a if a.is_a? String }
+      args.ensure_array(:flatten, :compact).each do |a|
+        self[:render_arguments] << a if a.is_a?(String)
+      end
       if block_given?
         result = instance_exec(self, &render_block) || empty_html
         result.is_a?(String) && self[:render_block] << result
@@ -168,9 +172,8 @@ module WrapIt
     # @return [String] new default_tag value.
     def self.default_tag(name = nil, override = true)
       return @default_tag if name.nil?
-      name.is_a?(String) || name.is_a?(Symbol) ||
-        fail(ArgumentError, 'Tag name should be a String or Symbol')
-      override ? @default_tag = name.to_s : @default_tag ||= name.to_s
+      name = name.ensure_string!
+      override ? @default_tag = name : @default_tag ||= name
     end
 
     def self.omit_content

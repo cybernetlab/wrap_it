@@ -7,6 +7,8 @@ module WrapIt
   # @todo  single_child realization
   # @todo  refactor code for more clearness
   class Container < Base
+    using EnsureIt if ENSURE_IT_REFINED
+
     switch :deffered_render do |_|
       # avoid changing deffered_render after any child added
       if @children.is_a?(Array)
@@ -77,8 +79,7 @@ module WrapIt
     #
     # @return [String]
     def self.child(name, *args, option: nil, **opts, &block)
-      name.is_a?(String) && name.to_sym
-      name.is_a?(Symbol) || fail(ArgumentError, 'Wrong child name')
+      name.ensure_symbol!
       child_class =
         if args.first.is_a?(String) || args.first.is_a?(Class)
           args.shift
@@ -89,7 +90,25 @@ module WrapIt
 
       define_method name do |*hargs, extracted: false, **hopts, &hblock|
         hargs += args
-        # TODO: merge html class correctly. Now it just overrided by opts
+        html_class = opts.delete(:class)
+        unless html_class.nil?
+          html_class = html_class.split(' ') if html_class.is_a?(String)
+          if hops[:class].is_a?(String)
+            hopts[:class] << ' ' << html_class.join(' ')
+          elsif hopts[:class].is_a?(Array)
+            hopts[:class].concat(html_class)
+          else
+            hopts[:class] = html_class
+          end
+        end
+        html_data = opts.delete(:data)
+        unless html_data.nil?
+          if hops[:data].is_a?(Hash)
+            hopts[:data].merge!(html_data)
+          else
+            hopts[:data] = html_data
+          end
+        end
         hopts.merge!(opts)
         hopts[:helper_name] = name
         child = prepare_child(child_class, block, *hargs, **hopts, &hblock)

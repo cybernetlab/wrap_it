@@ -30,9 +30,8 @@ module WrapIt
       # @return [Object, nil] founded variable or nil
       def get_derived(name)
         return instance_variable_get(name) if instance_variable_defined?(name)
-        ancestors.each do |ancestor|
+        parents.each do |ancestor|
           next unless ancestor.instance_variable_defined?(name)
-          break if ancestor == Base
           return ancestor.instance_variable_get(name)
         end
         nil

@@ -36,6 +36,8 @@ module WrapIt
     # {Enums} class methods
     #
     module ClassMethods
+      using EnsureIt if ENSURE_IT_REFINED
+
       #
       # Adds `enum`. When element created, creation arguments will be scanned
       # for `Symbol`, that included contains in `values`. If it founded, enum
@@ -79,7 +81,7 @@ module WrapIt
       # @return [void]
       def enum(name, values, opts = {}, &block)
         opts.symbolize_keys!
-        name = name.to_sym
+        name = name.ensure_symbol!
         opts.merge!(block: block, name: name, values: values)
         opts.key?(:default) && opts[:default] = opts[:default].to_sym
         if opts.delete(:html_class) == true || opts.key?(:html_class_prefix)

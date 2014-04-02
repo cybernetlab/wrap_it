@@ -36,6 +36,8 @@ module WrapIt
     # {Arguments} Class methods to include
     #
     module ClassMethods
+      using EnsureIt if ENSURE_IT_REFINED
+
       #
       # Desclares argument for capturing on initialization process.
       #
@@ -93,8 +95,7 @@ module WrapIt
       # @since  1.0.0
       def argument(name, first_only: false, after_options: false,
                    **opts, &block)
-        name.is_a?(String) && name = name.to_sym
-        fail ArgumentError, 'Wrong name' unless name.is_a?(Symbol)
+        name = name.ensure_symbol!
         arguments[name] = {
           name: name,
           conditions: Arguments.make_conditions(name, **opts),
@@ -152,8 +153,7 @@ module WrapIt
       # @return [void]
       # @since  1.0.0
       def option(name, after: nil, **opts, &block)
-        name.is_a?(String) && name = name.to_sym
-        fail ArgumentError, 'Wrong name' unless name.is_a?(Symbol)
+        name = name.ensure_symbol!
         @dependencies = !after.nil?
         options[name] = {
           name: name,
