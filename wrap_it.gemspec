@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.name          = 'wrap_it'
   spec.version       = WrapIt::VERSION
   spec.authors       = ['Alexey Ovchinnikov']
-  spec.email         = ['alexiss@cybernetlab.ru']
+  spec.email         = ['alexiss@cybernetlab.ru', 'alexey.ovchinnikov@yandex.ru']
   spec.description   = %q{Set of classes and modules for creating HTML helpers}
   spec.summary       = <<-EOL.gsub(/^\s+\|/, '')
     |This library provides set of classes and modules with simple DSL for quick
