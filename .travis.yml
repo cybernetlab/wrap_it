@@ -1,13 +1,10 @@
 language: ruby
 rvm:
-  - 2.0.0
-  - 2.1.0
-  - ruby-head
+  - 2.0.0-p353
+  - 2.1.1
 env:
   - FRAMEWORK=rails4 BUNDLE_GEMFILE=Gemfile.rails4
   - FRAMEWORK=rails4 BUNDLE_GEMFILE=Gemfile.rails4
-  - FRAMEWORK=rails4 BUNDLE_GEMFILE=Gemfile.rails4
 gemfile:
-  - Gemfile.rails4
   - Gemfile.rails4
   - Gemfile.rails4

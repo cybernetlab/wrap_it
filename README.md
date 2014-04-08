@@ -358,6 +358,9 @@ Look to [Reference documentation](http://rubydoc.info/github/cybernetlab/wrap_it
 
 # Changes
 
+`1.0.3`
+* added ensure_it library
+
 `1.0.2`
 * profiling in real application and some performance improvements
 

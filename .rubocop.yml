@@ -2,4 +2,4 @@ MethodLength:
   Max: 20
 
 CyclomaticComplexity:
-  Max: 7
+  Max: 8

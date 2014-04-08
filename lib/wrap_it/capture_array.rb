@@ -52,8 +52,8 @@ module WrapIt
     #   @option opts [Object, Array] :and one or array of `and`-ed conditions
     #
     # @overload capture!(&block)
-    #   @yield [element] Gives each element of array to block. You should return
-    #     `true` to capture this element or `false` to keep it in array.
+    #   @yield [element] Gives each element of array to block. You should
+    #     return `true` to capture this element or `false` to keep it in array.
     #   @yieldparam [Object] element element of array to inspect
     #   @yieldreturn [Boolean] whether exclude this element or not
     #
@@ -114,27 +114,25 @@ module WrapIt
 
     private
 
+    # @private
     def do_compare(target, *compare_args, &block)
-      if block_given?
-        yield target
-      else
-        options = compare_args.extract_options!
-        compare_args.map! { |x| x.is_a?(Proc) && x.lambda? ? x.call : x }
-        result = compare_args.any? do |dest|
-          case
-          when dest == true || dest == false then dest
-          when dest.is_a?(Array) then dest.include?(target)
-          when dest.is_a?(Regexp) then dest.match(target.to_s)
-          when dest.is_a?(Class) then target.is_a?(dest)
-          when dest.is_a?(Proc) then dest.call(dest) == true
-          else dest == target
-          end
+      return yield target if block_given?
+      options = compare_args.extract_options!
+      compare_args.map! { |x| x.is_a?(Proc) && x.lambda? ? x.call : x }
+      result = compare_args.any? do |dest|
+        case
+        when dest == true || dest == false then dest
+        when dest.is_a?(Array) then dest.include?(target)
+        when dest.is_a?(Regexp) then dest.match(target.to_s)
+        when dest.is_a?(Class) then target.is_a?(dest)
+        when dest.is_a?(Proc) then dest.call(dest) == true
+        else dest == target
         end
-        if options[:and].is_a?(Array)
-          result &&= do_compare(target, *options[:and])
-        end
-        result
       end
+      if options[:and].is_a?(Array)
+        result &&= do_compare(target, *options[:and])
+      end
+      result
     end
   end
 end
